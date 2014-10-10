@@ -5,7 +5,7 @@
  * Based on rtl_sdr
  *
  * Copyright (C) 2012 by Steve Markgraf <steve@steve-m.de>
- *
+ *de
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 2 of the License, or
@@ -498,8 +498,8 @@ static int validate_os_v2_message(unsigned char * msg, int bits_expected, int va
   } else {
     if (os_bad_pkt_received_callback != NULL)
       os_bad_pkt_received_callback(msg);
-//    fprintf(stderr, "Bit validation error on Oregon Scientific message.  Expected %d bits, received error after bit %d \n",        bits_expected, valid_v2_bits_received);	
-//    fprintf(stderr, "Message: "); int i; for (i=0 ;i<(bits_expected+7)/8 ; i++) fprintf(stderr, "%02x ", msg[i]); fprintf(stderr, "\n\n");
+    fprintf(stderr, "Bit validation error on Oregon Scientific message.  Expected %d bits, received error after bit %d \n",        bits_expected, valid_v2_bits_received);	
+    fprintf(stderr, "Message: "); int i; for (i=0 ;i<(bits_expected+7)/8 ; i++) fprintf(stderr, "%02x ", msg[i]); fprintf(stderr, "\n\n");
   }
   return 1;
 }
@@ -523,7 +523,7 @@ static int oregon_scientific_v2_1_parser(uint8_t bb[BITBUF_ROWS][BITBUF_COLS]) {
 		unsigned int pattern  = (unsigned int)(0x55990000>>pattern_index);
         unsigned int pattern2 = (unsigned int)(0xaa990000>>pattern_index);
 
-	//fprintf(stderr, "OS v2.1 sync byte search - test_val=%08x pattern=%08x  mask=%08x\n", sync_test_val, pattern, mask);
+	fprintf(stderr, "OS v2.1 sync byte search - test_val=%08x pattern=%08x  mask=%08x\n", sync_test_val, pattern, mask);
 
 	    if (((sync_test_val & mask) == pattern) || 
 		    ((sync_test_val & mask) == pattern2)) {
@@ -531,7 +531,7 @@ static int oregon_scientific_v2_1_parser(uint8_t bb[BITBUF_ROWS][BITBUF_COLS]) {
 		  // pattern_index indicates  where sync nibble starts, so now we can find the start of the payload
 	      int start_byte = 5 + (pattern_index>>3);
 	      int start_bit = pattern_index & 0x07;
-	//fprintf(stderr, "OS v2.1 Sync test val %08x found, starting decode at byte index %d bit %d\n", sync_test_val, start_byte, start_bit);
+	fprintf(stderr, "OS v2.1 Sync test val %08x found, starting decode at byte index %d bit %d\n", sync_test_val, start_byte, start_bit);
 	      int bits_processed = 0;
 		  unsigned char last_bit_val = 0;
 		  j=start_bit;
@@ -548,7 +548,7 @@ static int oregon_scientific_v2_1_parser(uint8_t bb[BITBUF_ROWS][BITBUF_COLS]) {
 			     // copy every other bit from source stream to dest packet
 				 msg[dest_bit>>3] |= (((bb[0][i] & (0x80 >> j)) >> (7-j)) << (7-(dest_bit & 0x07)));
 				 
-	//fprintf(stderr,"i=%d j=%d dest_bit=%02x bb=%02x msg=%02x\n",i, j, dest_bit, bb[0][i], msg[dest_bit>>3]); 
+	fprintf(stderr,"i=%d j=%d dest_bit=%02x bb=%02x msg=%02x\n",i, j, dest_bit, bb[0][i], msg[dest_bit>>3]); 
 				 if ((dest_bit & 0x07) == 0x07) {
 				    // after assembling each dest byte, flip bits in each nibble to convert from lsb to msb bit ordering
 				    int k = (dest_bit>>3);
@@ -630,13 +630,13 @@ static int oregon_scientific_v2_1_parser(uint8_t bb[BITBUF_ROWS][BITBUF_COLS]) {
 	  }
 	  return 1;
 	} else if (num_valid_v2_bits > 16) {
-//fprintf(stderr, "%d bit message received from unrecognized Oregon Scientific v2.1 sensor with device ID %x.\n", num_valid_v2_bits, sensor_id);
-//fprintf(stderr, "Message: "); for (i=0 ; i<20 ; i++) fprintf(stderr, "%02x ", msg[i]); fprintf(stderr,"\n\n");
+fprintf(stderr, "%d bit message received from unrecognized Oregon Scientific v2.1 sensor with device ID %x.\n", num_valid_v2_bits, sensor_id);
+fprintf(stderr, "Message: "); for (i=0 ; i<20 ; i++) fprintf(stderr, "%02x ", msg[i]); fprintf(stderr,"\n\n");
     } else {
-//fprintf(stderr, "\nPossible Oregon Scientific v2.1 message, but sync nibble wasn't found\n"); fprintf(stderr, "Raw Data: "); for (i=0 ; i<BITBUF_COLS ; i++) fprintf(stderr, "%02x ", bb[0][i]); fprintf(stderr,"\n\n");    
+fprintf(stderr, "\nPossible Oregon Scientific v2.1 message, but sync nibble wasn't found\n"); fprintf(stderr, "Raw Data: "); for (i=0 ; i<BITBUF_COLS ; i++) fprintf(stderr, "%02x ", bb[0][i]); fprintf(stderr,"\n\n");    
     } 
    } else {
-//if (bb[0][3] != 0) int i; fprintf(stderr, "\nBadly formatted OS v2.1 message encountered."); for (i=0 ; i<BITBUF_COLS ; i++) fprintf(stderr, "%02x ", bb[0][i]); fprintf(stderr,"\n\n");}
+if (bb[0][3] != 0) int i; fprintf(stderr, "\nBadly formatted OS v2.1 message encountered."); for (i=0 ; i<BITBUF_COLS ; i++) fprintf(stderr, "%02x ", bb[0][i]); fprintf(stderr,"\n\n");}
    }
    return 0;
 }
