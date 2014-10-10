@@ -533,7 +533,7 @@ void WX_process_rtl_433_pkt(unsigned char *msg, int sensor_id) {
      if      (forecast == 3)   forecast_str = "Rainy";
      else if (forecast == 6)   forecast_str = "Partly Cloudy";
      else if (forecast == 0xc) forecast_str = "Sunny";
-     //fprintf(stderr, " (%s) Pressure: %dmbar (%s)\n", comfort_str, pressure , forecast_str);  
+     fprintf(stderr, " (%s) Pressure: %dmbar (%s)\n", comfort_str, pressure , forecast_str);  
      if (wxData.idu.LockCode == -1)
        wxData.idu.LockCode = sensor_rolling_code;
      else if (wxData.idu.LockCode != sensor_rolling_code)
@@ -555,7 +555,7 @@ void WX_process_rtl_433_pkt(unsigned char *msg, int sensor_id) {
        wxData.idu.PressureTimestamp = wxData.currentTime;
      }
    } else if (sensor_id == 0x2d10) {
-     //fprintf(stderr, "Weather Sensor RGR968   Rain Gauge  Rain Rate: %2.0fmm/hr Total Rain %3.0fmm\n", rain_rate, total_rain);
+     fprintf(stderr, "Weather Sensor RGR968   Rain Gauge  Rain Rate: %2.0fmm/hr Total Rain %3.0fmm\n", rain_rate, total_rain);
      float rain_rate = (((msg[4] &0x0f)*100)+((msg[4]>>4)*10) + ((msg[5]>>4)&0x0f)) /10.0F;
      float total_rain = (((msg[7]&0xf)*10000)+((msg[7]>>4)*1000) + ((msg[6]&0xf)*100)+((msg[6]>>4)*10) + (msg[5]&0xf))/10.0F;
      if (wxData.rg.LockCode == -1)
