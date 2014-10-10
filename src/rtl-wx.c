@@ -480,8 +480,8 @@ void WX_process_rtl_433_pkt(unsigned char *msg, int sensor_id) {
      float temp_c = get_oregon_scientific_temperature(msg, 0x1d20);
      int humidity = get_oregon_scientific_humidity(msg, 0x1d20);
 
-     //fprintf(stderr, "Weather Sensor THGR122N Channel %d Temp: %3.1f캜  %3.1f캟   Humidity: %d%%\n",  channel, temp_c, ((temp_c*9)/5)+32, humidity);
-     //fprintf(stderr, "Weather Sensor THGR810 Channel %d Temp: %3.1f캜  %3.1f캟   Humidity: %d%%\n",  channel, temp_c, ((temp_c*9)/5)+32, humidity);
+     fprintf(stderr, "Weather Sensor THGR122N Channel %d Temp: %3.1f째C  %3.1f째F   Humidity: %d%%\n",  channel, temp_c, ((temp_c*9)/5)+32, humidity);
+     fprintf(stderr, "Weather Sensor THGR810 Channel %d Temp: %3.1f째C  %3.1f째F   Humidity: %d%%\n",  channel, temp_c, ((temp_c*9)/5)+32, humidity);
      if (wxData.ext[channel].LockCode == -1)
        wxData.ext[channel].LockCode = sensor_rolling_code;
      else if (wxData.ext[channel].LockCode != sensor_rolling_code)
@@ -501,7 +501,7 @@ void WX_process_rtl_433_pkt(unsigned char *msg, int sensor_id) {
    } else if (sensor_id == 0x1d30) {
      float temp_c = get_oregon_scientific_temperature(msg, 0x1d30);
      int humidity = get_oregon_scientific_humidity(msg, 0x1d30);
-     //fprintf(stderr, "Weather Sensor THGR968  Outdoor   Temp: %3.1f캜  %3.1f캟   Humidity: %d%%\n",  temp_c, ((temp_c*9)/5)+32, humidity);
+     fprintf(stderr, "Weather Sensor THGR968  Outdoor   Temp: %3.1f째C  %3.1f째F   Humidity: %d%%\n",  temp_c, ((temp_c*9)/5)+32, humidity);
      if (wxData.odu.LockCode == -1)
        wxData.odu.LockCode = sensor_rolling_code;
      else if (wxData.odu.LockCode != sensor_rolling_code)
@@ -522,7 +522,7 @@ void WX_process_rtl_433_pkt(unsigned char *msg, int sensor_id) {
      float temp_c = get_oregon_scientific_temperature(msg, 0x5d60);
      int humidity = get_oregon_scientific_humidity(msg, 0x5d60);
      int pressure = ((msg[7] & 0x0f) | (msg[8] & 0xf0))+856;
-     //fprintf(stderr,"Weather Sensor BHTR968  Indoor    Temp: %3.1f캜  %3.1f캟   Humidity: %d%%", temp_c, ((temp_c*9)/5)+32, humidity);  
+     fprintf(stderr,"Weather Sensor BHTR968  Indoor    Temp: %3.1f째C  %3.1f째F   Humidity: %d%%", temp_c, ((temp_c*9)/5)+32, humidity);  
      unsigned int comfort = msg[7] >>4;
      char *comfort_str="Normal";
      if      (comfort == 4)   comfort_str = "Comfortable";
