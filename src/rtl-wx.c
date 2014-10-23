@@ -112,25 +112,25 @@ int main(int argc, char *argv[])
      opMode=Error;
 
    if (opMode == Error) {
-     fprintf(stderr, "\n");
-     fprintf(stderr, "Usage: rtl-wx [-s -c -r] or rtl-wx -w <working dir name>\n\n");
-     fprintf(stderr, "  rtl-wx    - Server mode (most typical - use web for control)\n");
-     fprintf(stderr, "  rtl-wx -s - Standalone mode (terminal only, no web or  client support)\n");
-     fprintf(stderr, "  rtl-wx -c - Client mode (Connects to running server with named pipe in /tmp)\n");
-     fprintf(stderr, "  rtl-wx -r - Remote command mode (for cgi scripts in web interface)\n");
-     fprintf(stderr, "  rtl-wx -w <working dir> - Server mode using <working dir> (default is ./%s)\n\n", DEFAULT_WORKING_DIR);
+     fprintf(stderr, "\n\r\r");
+     fprintf(stderr, "Usage: rtl-wx [-s -c -r] or rtl-wx -w <working dir name>\n\r\r\n\r\r");
+     fprintf(stderr, "  rtl-wx    - Server mode (most typical - use web for control)\n\r");
+     fprintf(stderr, "  rtl-wx -s - Standalone mode (terminal only, no web or  client support)\n\r");
+     fprintf(stderr, "  rtl-wx -c - Client mode (Connects to running server with named pipe in /tmp)\n\r");
+     fprintf(stderr, "  rtl-wx -r - Remote command mode (for cgi scripts in web interface)\n\r");
+     fprintf(stderr, "  rtl-wx -w <working dir> - Server mode using <working dir> (default is ./%s)\n\r\n\r", DEFAULT_WORKING_DIR);
      exit(1); 
    }
 
    if (opMode == Server) {
     if (chdir(workingDirName) != 0) {
-      fprintf(stderr,"RTL-Wx: Unable to set working directory to %s.  Exiting...\n\n", workingDirName);
+      fprintf(stderr,"RTL-Wx: Unable to set working directory to %s.  Exiting...\n\r\n\r", workingDirName);
       exit(1);
     }
     // Open a log file to store all server output (DPRINTF() output is echoed here)
     // This is only done for server mode
     if ((logfd = fopen(LOG_FILE_PATH, "a")) == NULL) {
-      fprintf(stderr,"RTL-Wx: Unable to open logfile rtl-wx.log.  Exiting...\n\n");
+      fprintf(stderr,"RTL-Wx: Unable to open logfile rtl-wx.log.  Exiting...\n\r\n\r");
       exit(1);
     }
     // Need to create the interprocess communications fifos in the filesystem 
@@ -141,18 +141,18 @@ int main(int argc, char *argv[])
      
     // Now create the two fifos
     if (mkfifo(WX_CLIENT_SEND_PIPE, 0666) != 0) {
-        DPRINTF("RTL-Wx: Unable to create client send fifo:%s  Exiting...\n",
+        DPRINTF("RTL-Wx: Unable to create client send fifo:%s  Exiting...\n\r",
                                    WX_CLIENT_SEND_PIPE);
        exit(1);
     }
     if (mkfifo(WX_SERVER_SEND_PIPE, 0666) != 0) {
-        DPRINTF("RTL-Wx: Unable to create server Send fifo:%s  Exiting...\n",
+        DPRINTF("RTL-Wx: Unable to create server Send fifo:%s  Exiting...\n\r",
                                   WX_SERVER_SEND_PIPE);
        exit(1);
     }
     outputDesc = open(WX_SERVER_SEND_PIPE, O_RDWR | O_NDELAY | O_NOCTTY | O_NONBLOCK);  
     if ((outputfd = fopen(WX_SERVER_SEND_PIPE, "w")) == NULL) {
-      DPRINTF("RTL-Wx: Unable to open server send pipe %s.  Exiting...\n\n",
+      DPRINTF("RTL-Wx: Unable to open server send pipe %s.  Exiting...\n\r\n\r",
                                   WX_SERVER_SEND_PIPE);
       exit(1);
     }
@@ -164,7 +164,7 @@ int main(int argc, char *argv[])
    }
    else { // Standalone mode
     if (chdir(workingDirName) != 0) {
-      fprintf(stderr,"TRL-Wx: Unable to set working directory to %s.  Exiting...\n\n", workingDirName);
+      fprintf(stderr,"TRL-Wx: Unable to set working directory to %s.  Exiting...\n\r\n\r", workingDirName);
       exit(1);
     }
     outputfd = stdout;
@@ -185,10 +185,10 @@ int main(int argc, char *argv[])
  
    if ((opMode == Server) || (opMode == Standalone)) {
     if (opMode == Server) {
-       DPRINTF("\n");
-       DPRINTF("Program started in SERVER Mode\n"); }
+       DPRINTF("\n\r");
+       DPRINTF("Program started in SERVER Mode\n\r"); }
     else
-       DPRINTF("Program started in STANDALONE Mode\n");
+       DPRINTF("Program started in STANDALONE Mode\n\r");
     runServerStandaloneLoop(receiveDesc, outputfd);
     close(outputDesc);
    }
@@ -201,7 +201,7 @@ int main(int argc, char *argv[])
     runRemoteCommand(receiveDesc, cmd);
    }   
    else {
-     DPRINTF("Program started in CLIENT mode\n");
+     DPRINTF("Program started in CLIENT mode\n\r");
      runClientLoop(receiveDesc);
    }
   tcsetattr(receiveDesc, TCSANOW, &oldkey);
@@ -252,7 +252,7 @@ pthread_t rtl_433_thread_struct;
 void *rtl_433_thread(void *param) {
   char *argv[] = {"rtl_433","-f","433810000","-l","7000", NULL};
   rtl_433_main(5, argv);
-  fprintf(stderr,"RTL 433 Thread exited unexpectedly\n");
+  fprintf(stderr,"RTL 433 Thread exited unexpectedly\n\r");
   return NULL; 
 }
 
@@ -271,14 +271,14 @@ void runServerStandaloneLoop(int receiveDesc, FILE *outputfd)
   WX_Init();
 
   if(pthread_create(&rtl_433_thread_struct, NULL, rtl_433_thread, NULL)) {
-      fprintf(stderr, "Error creating rtl_433 receiver thread\n");
+      fprintf(stderr, "Error creating rtl_433 receiver thread\n\r");
       exit(0);
   } 
   rtl_433_register_os_bad_pkt_received_callback(WX_process_rtl_bad_pkt);
   rtl_433_register_os_pkt_received_callback(WX_process_rtl_433_pkt);
 
-  fprintf(outputfd, "Ready to gather weather sensor data \n");
-  fprintf(outputfd,"\n   <<Hit 'h' for help, any key for status, ESC to quit>>\n\n");
+  fprintf(outputfd, "Ready to gather weather sensor data \n\r");
+  fprintf(outputfd,"\n\r   <<Hit 'h' for help, any key for status, ESC to quit>>\n\r\n\r");
   fflush(outputfd);
 
   // Ignore the broken pipe signal.  This just means the test client has shut down and isn't listening or sending to us anymore.
@@ -305,21 +305,21 @@ void runServerStandaloneLoop(int receiveDesc, FILE *outputfd)
           case 0x1b:   /* Esc */
           case 'q':  /* q */
           case 0x03: /* ^C */
-            DPRINTF("Shutting down in response to user command\n");
+            DPRINTF("Shutting down in response to user command\n\r");
             stop = TRUE;
             break;
           case 'a':
                 WX_DumpSchedulerInfo(outputfd);
                 break;
           case 'c':
-            DPRINTF("Executing user command to read configuration file: %s\n", CONFIG_FILE_PATH);
+            DPRINTF("Executing user command to read configuration file: %s\n\r", CONFIG_FILE_PATH);
             WX_DoConfigFileRead();
             break;
           case 'd': 
             WX_DumpSensorInfo(outputfd);
             break;
           case 'f': 
-            DPRINTF("Executing user command to invoke tag file parser\n");
+            DPRINTF("Executing user command to invoke tag file parser\n\r");
                 WX_DoTagFileProcessing();
             break;
           case 'h':
@@ -332,46 +332,46 @@ void runServerStandaloneLoop(int receiveDesc, FILE *outputfd)
             if (logfd != NULL)
               fclose(logfd);
             if ((logfd = fopen(LOG_FILE_PATH, "w")) == NULL) {
-                fprintf(stderr, "RTL-Wx Error reopening log file %s\n",LOG_FILE_PATH);
+                fprintf(stderr, "RTL-Wx Error reopening log file %s\n\r",LOG_FILE_PATH);
                 exit(1);
             }
-            DPRINTF("Logfile cleared by user command\n");
+            DPRINTF("Logfile cleared by user command\n\r");
             break;
           case 'm':
             WX_DumpMaxMinInfo(outputfd);
             break;
           case 'n':
-            DPRINTF("Executing user command to reset historical max/min data\n");
+            DPRINTF("Executing user command to reset historical max/min data\n\r");
             WX_InitHistoricalMaxMinData();
             break;
           case 'r':
-            DPRINTF("Executing user command to reset sensor lock code and timout information\n");
+            DPRINTF("Executing user command to reset sensor lock code and timout information\n\r");
             init_sensor_lock_and_timeout_info();
             break;
           case 's':
-            DPRINTF("Executing user command to save data snapshot and rain snapshot\n");
+            DPRINTF("Executing user command to save data snapshot and rain snapshot\n\r");
             WX_DoDataSnapshotSave();
             WX_DoRainDataSnapshotSave();
             break;
           case 't':
             if (rawxDataDumpMode == TRUE) {
-               DPRINTF("Executing user command to disable raw message data display mode.\n");
+               DPRINTF("Executing user command to disable raw message data display mode.\n\r");
                rawxDataDumpMode = FALSE; }
             else {
-               DPRINTF("Executing user command to enable raw message data display mode.  All bytes will be echoed\n");
+               DPRINTF("Executing user command to enable raw message data display mode.  All bytes will be echoed\n\r");
                rawxDataDumpMode = TRUE; }
             break;
           case 'u': 
-            DPRINTF("Executing user command to do FTP upload\n");   
+            DPRINTF("Executing user command to do FTP upload\n\r");   
             fflush(outputfd);
             //  dump the current data to a file and send that file via ftp to a server
             if (WX_DoFtpUpload() != 0) {
-                DPRINTF("FTP upload completed successfully\n"); }
+                DPRINTF("FTP upload completed successfully\n\r"); }
             else
-                DPRINTF("FTP operation failed.\n");
+                DPRINTF("FTP operation failed.\n\r");
             break;
           case 'w':
-            DPRINTF("Executing user command to save webcam snapshot\n");
+            DPRINTF("Executing user command to save webcam snapshot\n\r");
             WX_DoWebcamSnapshot();
             break;
           default:
@@ -463,7 +463,7 @@ void WX_process_rtl_433_pkt(unsigned char *msg, int sensor_id) {
       int i; 
       for (i=0 ; i<20; i++) 
          fprintf(outputfd, "%02x ", msg[i]); 
-      fprintf(outputfd, "\n");
+      fprintf(outputfd, "\n\r");
    }
    
    int sensor_rolling_code = (((msg[2]&0x0f)<<4) | (msg[3]>>4));
@@ -480,8 +480,8 @@ void WX_process_rtl_433_pkt(unsigned char *msg, int sensor_id) {
      float temp_c = get_oregon_scientific_temperature(msg, 0x1d20);
      int humidity = get_oregon_scientific_humidity(msg, 0x1d20);
 
-     fprintf(stderr, "Weather Sensor THGR122N Channel %d Temp: %3.1f°C  %3.1f°F   Humidity: %d%%\n",  channel, temp_c, ((temp_c*9)/5)+32, humidity);
-     fprintf(stderr, "Weather Sensor THGR810 Channel %d Temp: %3.1f°C  %3.1f°F   Humidity: %d%%\n",  channel, temp_c, ((temp_c*9)/5)+32, humidity);
+     fprintf(stderr, "Weather Sensor THGR122N Channel %d Temp: %3.1f°C  %3.1f°F   Humidity: %d%%\n\r",  channel, temp_c, ((temp_c*9)/5)+32, humidity);
+     fprintf(stderr, "Weather Sensor THGR810 Channel %d Temp: %3.1f°C  %3.1f°F   Humidity: %d%%\n\r",  channel, temp_c, ((temp_c*9)/5)+32, humidity);
      if (wxData.ext[channel].LockCode == -1)
        wxData.ext[channel].LockCode = sensor_rolling_code;
      else if (wxData.ext[channel].LockCode != sensor_rolling_code)
@@ -501,7 +501,7 @@ void WX_process_rtl_433_pkt(unsigned char *msg, int sensor_id) {
    } else if (sensor_id == 0x1d30) {
      float temp_c = get_oregon_scientific_temperature(msg, 0x1d30);
      int humidity = get_oregon_scientific_humidity(msg, 0x1d30);
-     fprintf(stderr, "Weather Sensor THGR968  Outdoor   Temp: %3.1f°C  %3.1f°F   Humidity: %d%%\n",  temp_c, ((temp_c*9)/5)+32, humidity);
+     fprintf(stderr, "Weather Sensor THGR968  Outdoor   Temp: %3.1f°C  %3.1f°F   Humidity: %d%%\n\r",  temp_c, ((temp_c*9)/5)+32, humidity);
      if (wxData.odu.LockCode == -1)
        wxData.odu.LockCode = sensor_rolling_code;
      else if (wxData.odu.LockCode != sensor_rolling_code)
@@ -533,7 +533,7 @@ void WX_process_rtl_433_pkt(unsigned char *msg, int sensor_id) {
      if      (forecast == 3)   forecast_str = "Rainy";
      else if (forecast == 6)   forecast_str = "Partly Cloudy";
      else if (forecast == 0xc) forecast_str = "Sunny";
-     fprintf(stderr, " (%s) Pressure: %dmbar (%s)\n", comfort_str, pressure , forecast_str);  
+     fprintf(stderr, " (%s) Pressure: %dmbar (%s)\n\r", comfort_str, pressure , forecast_str);  
      if (wxData.idu.LockCode == -1)
        wxData.idu.LockCode = sensor_rolling_code;
      else if (wxData.idu.LockCode != sensor_rolling_code)
@@ -555,7 +555,7 @@ void WX_process_rtl_433_pkt(unsigned char *msg, int sensor_id) {
        wxData.idu.PressureTimestamp = wxData.currentTime;
      }
    } else if (sensor_id == 0x2d10) {
-     fprintf(stderr, "Weather Sensor RGR968   Rain Gauge  Rain Rate: %2.0fmm/hr Total Rain %3.0fmm\n", rain_rate, total_rain);
+     fprintf(stderr, "Weather Sensor RGR968   Rain Gauge  Rain Rate: %2.0fmm/hr Total Rain %3.0fmm\n\r", rain_rate, total_rain);
      float rain_rate = (((msg[4] &0x0f)*100)+((msg[4]>>4)*10) + ((msg[5]>>4)&0x0f)) /10.0F;
      float total_rain = (((msg[7]&0xf)*10000)+((msg[7]>>4)*1000) + ((msg[6]&0xf)*100)+((msg[6]>>4)*10) + (msg[5]&0xf))/10.0F;
      if (wxData.rg.LockCode == -1)
@@ -588,15 +588,15 @@ void runClientLoop(int recvFromServer)
    char Key;
    int tty;
    
-   printf("\nAttempting to connect to Server...\n\n");
+   printf("\n\rAttempting to connect to Server...\n\r\n\r");
 
    if ((sendToServerfd = fopen(WX_CLIENT_SEND_PIPE, "w")) == NULL) {
-      fprintf(stderr,"RTL-Wx: Unable to open pipe %s for sending commands to server.  Exiting...\n\n",
+      fprintf(stderr,"RTL-Wx: Unable to open pipe %s for sending commands to server.  Exiting...\n\r\n\r",
                                   WX_CLIENT_SEND_PIPE);
       exit(1);
    }
 
-   printf("Suceeded! \n\n");
+   printf("Suceeded! \n\r\n\r");
    fputc('x',sendToServerfd);
    fflush(sendToServerfd);
 
@@ -638,7 +638,7 @@ void runClientLoop(int recvFromServer)
    tcsetattr(tty, TCSANOW, &oldkey);
    close(tty);
    fclose(sendToServerfd);
-   printf("RTL-Wx Client exiting...\n");
+   printf("RTL-Wx Client exiting...\n\r");
 
 }
 
@@ -653,7 +653,7 @@ void runRemoteCommand(int recvFromServer, char command)
    char outChar=0;
 
    if ((sendToServerfd = fopen(WX_CLIENT_SEND_PIPE, "w")) == NULL) {
-      fprintf(stderr,"RTL-Wx: Unable to open pipe %s for sending commands to server.  Exiting...\n\n",
+      fprintf(stderr,"RTL-Wx: Unable to open pipe %s for sending commands to server.  Exiting...\n\r\n\r",
                                   WX_CLIENT_SEND_PIPE);
       exit(1);
    }
@@ -691,27 +691,27 @@ void runRemoteCommand(int recvFromServer, char command)
 }
 void outputProgramHelp(FILE *fd)
 {
-   fprintf(fd,"\nRTL-Wx Weather Data Monitoring Software\n\n");
-   fprintf(fd,"This program attempts to collect data from 433Mhz wireless weather sensors\n");
-   fprintf(fd,"or an Oregon Scientific weather station connected through a serial port.\n\n");
-   fprintf(fd,"Commands:\n");
-   fprintf(fd,"             h  - help (this message)\n");
-   fprintf(fd,"             a  - Display Action Scheduler Info\n");
-   fprintf(fd,"             c  - Process configuration file\n");
-   fprintf(fd,"             d  - Show debugging statistics\n");
-   fprintf(fd,"             f  - invoke file parser - to replace tags w/data\n");
-   fprintf(fd,"             i  - Show config info\n");
-   fprintf(fd,"             l  - clear log file (rtl-wx.log)\n");
-   fprintf(fd,"             m  - show historical max/min data\n");
-   fprintf(fd,"             n  - clear historical max/min data\n");
-   fprintf(fd,"             r  - reset sensor lock codes and clear timeout counts\n");
-   fprintf(fd,"             s  - Save data snapshot now\n");
-   fprintf(fd,"             t  - Toggle raw sensor message display mode\n");
-   fprintf(fd,"             u  - Initiate FTP upload\n");
-   fprintf(fd,"             w  - Save webcam snapshot\n");
-   fprintf(fd,"             q  - quit client (server stays running)\n");
-   fprintf(fd,"            ESC - Kill server (and quit client)\n");
-   fprintf(fd,"            <Any other key shows current data>\n");
+   fprintf(fd,"\n\rRTL-Wx Weather Data Monitoring Software\n\r\n\r");
+   fprintf(fd,"This program attempts to collect data from 433Mhz wireless weather sensors\n\r");
+   fprintf(fd,"or an Oregon Scientific weather station connected through a serial port.\n\r\n\r");
+   fprintf(fd,"Commands:\n\r");
+   fprintf(fd,"             h  - help (this message)\n\r");
+   fprintf(fd,"             a  - Display Action Scheduler Info\n\r");
+   fprintf(fd,"             c  - Process configuration file\n\r");
+   fprintf(fd,"             d  - Show debugging statistics\n\r");
+   fprintf(fd,"             f  - invoke file parser - to replace tags w/data\n\r");
+   fprintf(fd,"             i  - Show config info\n\r");
+   fprintf(fd,"             l  - clear log file (rtl-wx.log)\n\r");
+   fprintf(fd,"             m  - show historical max/min data\n\r");
+   fprintf(fd,"             n  - clear historical max/min data\n\r");
+   fprintf(fd,"             r  - reset sensor lock codes and clear timeout counts\n\r");
+   fprintf(fd,"             s  - Save data snapshot now\n\r");
+   fprintf(fd,"             t  - Toggle raw sensor message display mode\n\r");
+   fprintf(fd,"             u  - Initiate FTP upload\n\r");
+   fprintf(fd,"             w  - Save webcam snapshot\n\r");
+   fprintf(fd,"             q  - quit client (server stays running)\n\r");
+   fprintf(fd,"            ESC - Kill server (and quit client)\n\r");
+   fprintf(fd,"            <Any other key shows current data>\n\r");
 }
 
 void WX_milliSleep(int milliseconds)
