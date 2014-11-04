@@ -5,7 +5,7 @@
  * Based on rtl_sdr
  *
  * Copyright (C) 2012 by Steve Markgraf <steve@steve-m.de>
- *de
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 2 of the License, or
@@ -73,6 +73,7 @@
 #endif
 
 #include "rtl-sdr.h"
+#include "rtl-wx.h"
 
 #define DEFAULT_SAMPLE_RATE     250000
 #define DEFAULT_FREQUENCY       433920000
@@ -121,7 +122,7 @@ typedef struct {
 
 static int debug_callback(uint8_t bb[BITBUF_ROWS][BITBUF_COLS]) {
     int i,j,k;
-    fprintf(stderr, "\n\r\r");
+    fprintf(stderr, "\n");
     for (i=0 ; i<BITBUF_ROWS ; i++) {
         fprintf(stderr, "[%02d] ",i);
         for (j=0 ; j<BITBUF_COLS ; j++) {
@@ -137,9 +138,9 @@ static int debug_callback(uint8_t bb[BITBUF_ROWS][BITBUF_COLS]) {
             }
             fprintf(stderr, " ");
         }
-        fprintf(stderr, "\n\r");
+        fprintf(stderr, "\n");
     }
-    fprintf(stderr, "\n\r");
+    fprintf(stderr, "\n");
 
     return 0;
 }
@@ -155,9 +156,9 @@ static int silvercrest_callback(uint8_t bb[BITBUF_ROWS][BITBUF_COLS]) {
         bb[3][1] == 0x4d &&
         bb[4][1] == 0x4d) {
         /* Pretty sure this is a Silvercrest remote */
-        fprintf(stderr, "Remote button event:\n\r");
-        fprintf(stderr, "model = Silvercrest\n\r");
-        fprintf(stderr, "%02x %02x %02x %02x %02x\n\r",bb[1][0],bb[0][1],bb[0][2],bb[0][3],bb[0][4]);
+        fprintf(stderr, "Remote button event:\n");
+        fprintf(stderr, "model = Silvercrest\n");
+        fprintf(stderr, "%02x %02x %02x %02x %02x\n",bb[1][0],bb[0][1],bb[0][2],bb[0][3],bb[0][4]);
 
         if (debug_output)
             debug_callback(bb);
@@ -185,11 +186,11 @@ static int rubicson_callback(uint8_t bb[BITBUF_ROWS][BITBUF_COLS]) {
         temperature_before_dec = abs(temp / 10);
         temperature_after_dec = abs(temp % 10);
 
-        fprintf(stderr, "Sensor temperature event:\n\r");
-        fprintf(stderr, "protocol       = Rubicson/Auriol\n\r");
-        fprintf(stderr, "rid            = %x\n\r",bb[0][0]);
-        fprintf(stderr, "temp           = %s%d.%d\n\r",temp<0?"-":"",temperature_before_dec, temperature_after_dec);
-        fprintf(stderr, "%02x %02x %02x %02x %02x\n\r",bb[1][0],bb[0][1],bb[0][2],bb[0][3],bb[0][4]);
+        fprintf(stderr, "Sensor temperature event:\n");
+        fprintf(stderr, "protocol       = Rubicson/Auriol\n");
+        fprintf(stderr, "rid            = %x\n",bb[0][0]);
+        fprintf(stderr, "temp           = %s%d.%d\n",temp<0?"-":"",temperature_before_dec, temperature_after_dec);
+        fprintf(stderr, "%02x %02x %02x %02x %02x\n",bb[1][0],bb[0][1],bb[0][2],bb[0][3],bb[0][4]);
 
         if (debug_output)
             debug_callback(bb);
@@ -212,19 +213,19 @@ static int prologue_callback(uint8_t bb[BITBUF_ROWS][BITBUF_COLS]) {
         /* Prologue sensor */
         temp2 = (int16_t)((uint16_t)(bb[1][2] << 8) | (bb[1][3]&0xF0));
         temp2 = temp2 >> 4;
-        fprintf(stderr, "Sensor temperature event:\n\r");
-        fprintf(stderr, "protocol      = Prologue\n\r");
-        fprintf(stderr, "button        = %d\n\r",bb[1][1]&0x04?1:0);
-        fprintf(stderr, "battery       = %s\n\r",bb[1][1]&0x08?"Ok":"Low");
-        fprintf(stderr, "temp          = %s%d.%d\n\r",temp2<0?"-":"",abs((int16_t)temp2/10),abs((int16_t)temp2%10));
-        fprintf(stderr, "humidity      = %d\n\r", ((bb[1][3]&0x0F)<<4)|(bb[1][4]>>4));
-        fprintf(stderr, "channel       = %d\n\r",(bb[1][1]&0x03)+1);
-        fprintf(stderr, "id            = %d\n\r",(bb[1][0]&0xF0)>>4);
+        fprintf(stderr, "Sensor temperature event:\n");
+        fprintf(stderr, "protocol      = Prologue\n");
+        fprintf(stderr, "button        = %d\n",bb[1][1]&0x04?1:0);
+        fprintf(stderr, "battery       = %s\n",bb[1][1]&0x08?"Ok":"Low");
+        fprintf(stderr, "temp          = %s%d.%d\n",temp2<0?"-":"",abs((int16_t)temp2/10),abs((int16_t)temp2%10));
+        fprintf(stderr, "humidity      = %d\n", ((bb[1][3]&0x0F)<<4)|(bb[1][4]>>4));
+        fprintf(stderr, "channel       = %d\n",(bb[1][1]&0x03)+1);
+        fprintf(stderr, "id            = %d\n",(bb[1][0]&0xF0)>>4);
         rid = ((bb[1][0]&0x0F)<<4)|(bb[1][1]&0xF0)>>4;
-        fprintf(stderr, "rid           = %d\n\r", rid);
-        fprintf(stderr, "hrid          = %02x\n\r", rid);
+        fprintf(stderr, "rid           = %d\n", rid);
+        fprintf(stderr, "hrid          = %02x\n", rid);
 
-        fprintf(stderr, "%02x %02x %02x %02x %02x\n\r",bb[1][0],bb[1][1],bb[1][2],bb[1][3],bb[1][4]);
+        fprintf(stderr, "%02x %02x %02x %02x %02x\n",bb[1][0],bb[1][1],bb[1][2],bb[1][3],bb[1][4]);
 
         if (debug_output)
             debug_callback(bb);
@@ -247,13 +248,13 @@ static int waveman_callback(uint8_t bb[BITBUF_ROWS][BITBUF_COLS]) {
             nb[i] |= ((bb[0][i]&0x03)==0x03) ? 0x00 : 0x08;
         }
 
-        fprintf(stderr, "Remote button event:\n\r");
-        fprintf(stderr, "model   = Waveman Switch Transmitter\n\r");
-        fprintf(stderr, "id      = %c\n\r", 'A'+nb[0]);
-        fprintf(stderr, "channel = %d\n\r", (nb[1]>>2)+1);
-        fprintf(stderr, "button  = %d\n\r", (nb[1]&3)+1);
-        fprintf(stderr, "state   = %s\n\r", (nb[2]==0xe) ? "on" : "off");
-        fprintf(stderr, "%02x %02x %02x\n\r",nb[0],nb[1],nb[2]);
+        fprintf(stderr, "Remote button event:\n");
+        fprintf(stderr, "model   = Waveman Switch Transmitter\n");
+        fprintf(stderr, "id      = %c\n", 'A'+nb[0]);
+        fprintf(stderr, "channel = %d\n", (nb[1]>>2)+1);
+        fprintf(stderr, "button  = %d\n", (nb[1]&3)+1);
+        fprintf(stderr, "state   = %s\n", (nb[2]==0xe) ? "on" : "off");
+        fprintf(stderr, "%02x %02x %02x\n",nb[0],nb[1],nb[2]);
 
         if (debug_output)
             debug_callback(bb);
@@ -267,27 +268,27 @@ static int steffen_callback(uint8_t bb[BITBUF_ROWS][BITBUF_COLS]) {
 
     if (bb[0][0]==0x00 && ((bb[1][0]&0x07)==0x07) && bb[1][0]==bb[2][0] && bb[2][0]==bb[3][0]) {
         
-        fprintf(stderr, "Remote button event:\n\r");
-        fprintf(stderr, "model   = Steffan Switch Transmitter\n\r");
-	fprintf(stderr, "code    = %d%d%d%d%d\n\r", (bb[1][0]&0x80)>>7, (bb[1][0]&0x40)>>6, (bb[1][0]&0x20)>>5, (bb[1][0]&0x10)>>4, (bb[1][0]&0x08)>>3);
+        fprintf(stderr, "Remote button event:\n");
+        fprintf(stderr, "model   = Steffan Switch Transmitter\n");
+	fprintf(stderr, "code    = %d%d%d%d%d\n", (bb[1][0]&0x80)>>7, (bb[1][0]&0x40)>>6, (bb[1][0]&0x20)>>5, (bb[1][0]&0x10)>>4, (bb[1][0]&0x08)>>3);
 
 	if ((bb[1][2]&0x0f)==0x0e)
-            fprintf(stderr, "button  = A\n\r");
+            fprintf(stderr, "button  = A\n");
         else if ((bb[1][2]&0x0f)==0x0d)
-            fprintf(stderr, "button  = B\n\r");
+            fprintf(stderr, "button  = B\n");
         else if ((bb[1][2]&0x0f)==0x0b)
-            fprintf(stderr, "button  = C\n\r");
+            fprintf(stderr, "button  = C\n");
         else if ((bb[1][2]&0x0f)==0x07)
-            fprintf(stderr, "button  = D\n\r");
+            fprintf(stderr, "button  = D\n");
         else if ((bb[1][2]&0x0f)==0x0f)
-            fprintf(stderr, "button  = ALL\n\r");
+            fprintf(stderr, "button  = ALL\n");
 	else
-	    fprintf(stderr, "button  = unknown\n\r");
+	    fprintf(stderr, "button  = unknown\n");
 
 	if ((bb[1][2]&0xf0)==0xf0) {
-            fprintf(stderr, "state   = OFF\n\r");
+            fprintf(stderr, "state   = OFF\n");
 	} else {
-            fprintf(stderr, "state   = ON\n\r");
+            fprintf(stderr, "state   = ON\n");
         }
 
         if (debug_output)
@@ -334,7 +335,7 @@ static int em1000_callback(uint8_t bb[BITBUF_ROWS][BITBUF_COLS]) {
         dec[i] = AD_POP (bb_p, 8, bit); bit+=8;
         stopbit=AD_POP (bb_p, 1, bit); bit+=1;
         if (!stopbit) {
-//            fprintf(stderr, "!stopbit: %i\n\r", i);
+//            fprintf(stderr, "!stopbit: %i\n", i);
             return 0;
         }
         checksum_calculated ^= dec[i];
@@ -344,21 +345,21 @@ static int em1000_callback(uint8_t bb[BITBUF_ROWS][BITBUF_COLS]) {
     // Read checksum
     checksum_received = AD_POP (bb_p, 8, bit); bit+=8;
     if (checksum_received != checksum_calculated) {
-//        fprintf(stderr, "checksum_received != checksum_calculated: %d %d\n\r", checksum_received, checksum_calculated);
+//        fprintf(stderr, "checksum_received != checksum_calculated: %d %d\n", checksum_received, checksum_calculated);
         return 0;
     }
 
-//for (i = 0; i < bytes; i++) fprintf(stderr, "%02X ", dec[i]); fprintf(stderr, "\n\r");
+//for (i = 0; i < bytes; i++) fprintf(stderr, "%02X ", dec[i]); fprintf(stderr, "\n");
 
     // based on 15_CUL_EM.pm
-    fprintf(stderr, "Energy sensor event:\n\r");
-    fprintf(stderr, "protocol      = ELV EM 1000\n\r");
-    fprintf(stderr, "type          = EM 1000-%s\n\r",dec[0]>=1&&dec[0]<=3?types[dec[0]-1]:"?");
-    fprintf(stderr, "code          = %d\n\r",dec[1]);
-    fprintf(stderr, "seqno         = %d\n\r",dec[2]);
-    fprintf(stderr, "total cnt     = %d\n\r",dec[3]|dec[4]<<8);
-    fprintf(stderr, "current cnt   = %d\n\r",dec[5]|dec[6]<<8);
-    fprintf(stderr, "peak cnt      = %d\n\r",dec[7]|dec[8]<<8);
+    fprintf(stderr, "Energy sensor event:\n");
+    fprintf(stderr, "protocol      = ELV EM 1000\n");
+    fprintf(stderr, "type          = EM 1000-%s\n",dec[0]>=1&&dec[0]<=3?types[dec[0]-1]:"?");
+    fprintf(stderr, "code          = %d\n",dec[1]);
+    fprintf(stderr, "seqno         = %d\n",dec[2]);
+    fprintf(stderr, "total cnt     = %d\n",dec[3]|dec[4]<<8);
+    fprintf(stderr, "current cnt   = %d\n",dec[5]|dec[6]<<8);
+    fprintf(stderr, "peak cnt      = %d\n",dec[7]|dec[8]<<8);
 
     return 1;
 }
@@ -377,7 +378,7 @@ static int ws2000_callback(uint8_t bb[BITBUF_ROWS][BITBUF_COLS]) {
     dec[0] = AD_POP (bb[0], 4, bit); bit+=4;
     stopbit= AD_POP (bb[0], 1, bit); bit+=1;
     if (!stopbit) {
-//fprintf(stderr, "!stopbit\n\r");
+//fprintf(stderr, "!stopbit\n");
         return 0;
     }
     check_calculated ^= dec[0];
@@ -388,7 +389,7 @@ static int ws2000_callback(uint8_t bb[BITBUF_ROWS][BITBUF_COLS]) {
         dec[i] = AD_POP (bb[0], 4, bit); bit+=4;
         stopbit= AD_POP (bb[0], 1, bit); bit+=1;
         if (!stopbit) {
-//fprintf(stderr, "!stopbit %i\n\r", i);
+//fprintf(stderr, "!stopbit %i\n", i);
             return 0;
         }
         check_calculated ^= dec[i];
@@ -397,7 +398,7 @@ static int ws2000_callback(uint8_t bb[BITBUF_ROWS][BITBUF_COLS]) {
     }
 
     if (check_calculated) {
-//fprintf(stderr, "check_calculated (%d) != 0\n\r", check_calculated);
+//fprintf(stderr, "check_calculated (%d) != 0\n", check_calculated);
         return 0;
     }
 
@@ -410,16 +411,16 @@ static int ws2000_callback(uint8_t bb[BITBUF_ROWS][BITBUF_COLS]) {
         return 0;
     }
 
-//for (i = 0; i < nibbles; i++) fprintf(stderr, "%02X ", dec[i]); fprintf(stderr, "\n\r");
+//for (i = 0; i < nibbles; i++) fprintf(stderr, "%02X ", dec[i]); fprintf(stderr, "\n");
 
-    fprintf(stderr, "Weather station sensor event:\n\r");
-    fprintf(stderr, "protocol      = ELV WS 2000\n\r");
-    fprintf(stderr, "type (!=ToDo) = %s\n\r", dec[0]<=7?types[dec[0]]:"?");
-    fprintf(stderr, "code          = %d\n\r", dec[1]&7);
-    fprintf(stderr, "temp          = %s%d.%d\n\r", dec[1]&8?"-":"", dec[4]*10+dec[3], dec[2]);
-    fprintf(stderr, "humidity      = %d.%d\n\r", dec[7]*10+dec[6], dec[5]);
+    fprintf(stderr, "Weather station sensor event:\n");
+    fprintf(stderr, "protocol      = ELV WS 2000\n");
+    fprintf(stderr, "type (!=ToDo) = %s\n", dec[0]<=7?types[dec[0]]:"?");
+    fprintf(stderr, "code          = %d\n", dec[1]&7);
+    fprintf(stderr, "temp          = %s%d.%d\n", dec[1]&8?"-":"", dec[4]*10+dec[3], dec[2]);
+    fprintf(stderr, "humidity      = %d.%d\n", dec[7]*10+dec[6], dec[5]);
     if(dec[0]==4) {
-        fprintf(stderr, "pressure      = %d\n\r", 200+dec[10]*100+dec[9]*10+dec[8]);
+        fprintf(stderr, "pressure      = %d\n", 200+dec[10]*100+dec[9]*10+dec[8]);
     }
 	
     return 1;
@@ -430,8 +431,63 @@ static int acurite_rain_gauge_callback(uint8_t bb[BITBUF_ROWS][BITBUF_COLS]) {
     if ((bb[0][0] != 0) && (bb[0][1] != 0) && (bb[0][2]!=0) && (bb[0][3] == 0) && (bb[0][4] == 0)) {
 	    float total_rain = ((bb[0][1]&0xf)<<8)+ bb[0][2];
 		total_rain /= 2; // Sensor reports number of bucket tips.  Each bucket tip is .5mm
-        fprintf(stderr, "AcuRite Rain Gauge Total Rain is %2.1fmm\n\r", total_rain);
-		fprintf(stderr, "Raw Message: %02x %02x %02x %02x %02x\n\r",bb[0][0],bb[0][1],bb[0][2],bb[0][3],bb[0][4]);
+        fprintf(stderr, "AcuRite Rain Gauge Total Rain is %2.1fmm\n", total_rain);
+		fprintf(stderr, "Raw Message: %02x %02x %02x %02x %02x\n",bb[0][0],bb[0][1],bb[0][2],bb[0][3],bb[0][4]);
+        return 1;
+    }
+    return 0;
+}
+
+// Callback for Aureol Temperature station compatible sensors
+static int aureol_callback(uint8_t bb[BITBUF_ROWS][BITBUF_COLS]) {
+    int temperature_before_dec;
+    int temperature_after_dec;
+    int16_t temp;
+    int sensor_id;
+    uint32_t *notnul;
+    int i,j;
+    time_t timer;
+    char buffer[25];
+    struct tm* tm_info;
+
+    /* FIXME validate the received message better, figure out crc so we can prevent false positives */
+    notnul = (uint32_t*)&bb[1][0];
+    if ( *notnul != 0 && bb[0][0] == 0 && bb[1][0] != 0 &&
+         bb[1][0] == bb[2][0] && bb[2][0] == bb[3][0] && bb[3][0] == bb[4][0] &&
+         bb[4][0] == bb[5][0] && bb[5][0] == bb[6][0] && bb[6][0] == bb[7][0] ) {
+        for( i = 1; i < 8; i++)
+        {
+            if( memcmp( &(bb[1]), &(bb[i]), 4 ) != 0 )
+            {
+                return 0;
+            }
+        }
+
+        /* Nible 3,4,5 contains 12 bits of temperature
+         * The temperature is signed and scaled by 10 */
+
+        temp = (int16_t)((uint16_t)(bb[1][1] << 12) | (bb[1][2] << 4));
+        temp = temp >> 4;
+
+        sensor_id = bb[1][0];
+
+        temperature_before_dec = abs(temp / 10);
+        temperature_after_dec = abs(temp % 10);
+
+        /* Determine current time and put in a formatted string buffer */
+        time(&timer);
+        tm_info = localtime(&timer);
+        strftime(buffer, 25, "%Y-%m-%d %H:%M:%S", tm_info);
+
+        fprintf(stderr, "Auriol Temperature Sensor (Z31743A-TX) ID %x(%d) temp = %s%d.%d time = %s\n",
+           sensor_id, sensor_id, temp<0?"-":"", temperature_before_dec, temperature_after_dec,  buffer);
+        //fprintf(stderr, "protocol       = Auriol\n");
+        //fprintf(stderr, "rid            = %x\n",bb[1][0]);
+        //fprintf(stderr, "temp           = %s%d.%d\n",temp<0?"-":"",temperature_before_dec, temperature_after_dec);
+
+        if (debug_output)
+            debug_callback(bb);
+
         return 1;
     }
     return 0;
@@ -484,8 +540,8 @@ static int validate_os_checksum(unsigned char *msg, int checksum_nibble_idx) {
 	if (os_bad_pkt_received_callback != NULL)
 		os_bad_pkt_received_callback(msg);
 
-    fprintf(stderr, "Checksum error in Oregon Scientific message.  Expected: %02x  Calculated: %02x\n\r", checksum, sum_of_nibbles);	
-	fprintf(stderr, "Message: "); int i; for (i=0 ;i<((checksum_nibble_idx+4)>>1) ; i++) fprintf(stderr, "%02x ", msg[i]); fprintf(stderr, "\n\r\n\r");
+    fprintf(stderr, "Checksum error in Oregon Scientific message.  Expected: %02x  Calculated: %02x\n", checksum, sum_of_nibbles);	
+	fprintf(stderr, "Message: "); int i; for (i=0 ;i<((checksum_nibble_idx+4)>>1) ; i++) fprintf(stderr, "%02x ", msg[i]); fprintf(stderr, "\n\n");
 	return 1;
   }
 }
@@ -498,16 +554,18 @@ static int validate_os_v2_message(unsigned char * msg, int bits_expected, int va
   } else {
     if (os_bad_pkt_received_callback != NULL)
       os_bad_pkt_received_callback(msg);
-    fprintf(stderr, "Bit validation error on Oregon Scientific message.  Expected %d bits, received error after bit %d \n\r",        bits_expected, valid_v2_bits_received);	
-    fprintf(stderr, "Message: "); int i; for (i=0 ;i<(bits_expected+7)/8 ; i++) fprintf(stderr, "%02x ", msg[i]); fprintf(stderr, "\n\r\n\r");
+//    fprintf(stderr, "Bit validation error on Oregon Scientific message.  Expected %d bits, received error after bit %d \n",        bits_expected, valid_v2_bits_received);	
+//    fprintf(stderr, "Message: "); int i; for (i=0 ;i<(bits_expected+7)/8 ; i++) fprintf(stderr, "%02x ", msg[i]); fprintf(stderr, "\n\n");
   }
   return 1;
 }
 
 static int oregon_scientific_v2_1_parser(uint8_t bb[BITBUF_ROWS][BITBUF_COLS]) {
+//DPRINTF("oregon_scientific_v2_1_parser\n");
    // Check 2nd and 3rd bytes of stream for possible Oregon Scientific v2.1 sensor data (skip first byte to get past sync/startup bit errors)
    if ( ((bb[0][1] == 0x55) && (bb[0][2] == 0x55)) ||
 	    ((bb[0][1] == 0xAA) && (bb[0][2] == 0xAA))) {
+//DPRINTF("valid ");
 	  int i,j;
 	  unsigned char msg[BITBUF_COLS] = {0};
 	   
@@ -523,7 +581,7 @@ static int oregon_scientific_v2_1_parser(uint8_t bb[BITBUF_ROWS][BITBUF_COLS]) {
 		unsigned int pattern  = (unsigned int)(0x55990000>>pattern_index);
         unsigned int pattern2 = (unsigned int)(0xaa990000>>pattern_index);
 
-	fprintf(stderr, "OS v2.1 sync byte search - test_val=%08x pattern=%08x  mask=%08x\n\r", sync_test_val, pattern, mask);
+	//fprintf(stderr, "OS v2.1 sync byte search - test_val=%08x pattern=%08x  mask=%08x\n", sync_test_val, pattern, mask);
 
 	    if (((sync_test_val & mask) == pattern) || 
 		    ((sync_test_val & mask) == pattern2)) {
@@ -531,7 +589,7 @@ static int oregon_scientific_v2_1_parser(uint8_t bb[BITBUF_ROWS][BITBUF_COLS]) {
 		  // pattern_index indicates  where sync nibble starts, so now we can find the start of the payload
 	      int start_byte = 5 + (pattern_index>>3);
 	      int start_bit = pattern_index & 0x07;
-	fprintf(stderr, "OS v2.1 Sync test val %08x found, starting decode at byte index %d bit %d\n\r", sync_test_val, start_byte, start_bit);
+	//fprintf(stderr, "OS v2.1 Sync test val %08x found, starting decode at byte index %d bit %d\n", sync_test_val, start_byte, start_bit);
 	      int bits_processed = 0;
 		  unsigned char last_bit_val = 0;
 		  j=start_bit;
@@ -548,7 +606,7 @@ static int oregon_scientific_v2_1_parser(uint8_t bb[BITBUF_ROWS][BITBUF_COLS]) {
 			     // copy every other bit from source stream to dest packet
 				 msg[dest_bit>>3] |= (((bb[0][i] & (0x80 >> j)) >> (7-j)) << (7-(dest_bit & 0x07)));
 				 
-	fprintf(stderr,"i=%d j=%d dest_bit=%02x bb=%02x msg=%02x\n\r",i, j, dest_bit, bb[0][i], msg[dest_bit>>3]); 
+	//fprintf(stderr,"i=%d j=%d dest_bit=%02x bb=%02x msg=%02x\n",i, j, dest_bit, bb[0][i], msg[dest_bit>>3]); 
 				 if ((dest_bit & 0x07) == 0x07) {
 				    // after assembling each dest byte, flip bits in each nibble to convert from lsb to msb bit ordering
 				    int k = (dest_bit>>3);
@@ -572,6 +630,7 @@ static int oregon_scientific_v2_1_parser(uint8_t bb[BITBUF_ROWS][BITBUF_COLS]) {
 	  
 
     int sensor_id = (msg[0] << 8) | msg[1];
+//DPRINTF("Sensor ID: %x\n", sensor_id);
 	if ((sensor_id == 0x1d20) || (sensor_id == 0x1d30))	{
 	   if (validate_os_v2_message(msg, 153, num_valid_v2_bits, 15) == 0) {
 	     if (os_pkt_received_callback != NULL) {
@@ -584,10 +643,10 @@ static int oregon_scientific_v2_1_parser(uint8_t bb[BITBUF_ROWS][BITBUF_COLS]) {
 	   float temp_c = get_os_temperature(msg, sensor_id);
 	   if (sensor_id == 0x1d20) fprintf(stderr, "Weather Sensor THGR122N Channel %d ", channel);
 	   else fprintf(stderr, "Weather Sensor THGR968  Outdoor   ");
-	   fprintf(stderr, "Temp: %3.1f°C  %3.1f°F   Humidity: %d%%\n\r", temp_c, ((temp_c*9)/5)+32,get_os_humidity(msg, sensor_id));
+	   fprintf(stderr, "Temp: %3.1f°C  %3.1f°F   Humidity: %d%%\n", temp_c, ((temp_c*9)/5)+32,get_os_humidity(msg, sensor_id));
 	   }
 	   return 1;  
-    } else if (sensor_id == 0x5d60) {
+        } else if (sensor_id == 0x5d60) {
 	   if (validate_os_v2_message(msg, 185, num_valid_v2_bits, 19) == 0) {
 	     if (os_pkt_received_callback != NULL) {
 		os_pkt_received_callback(msg, sensor_id);
@@ -605,7 +664,7 @@ static int oregon_scientific_v2_1_parser(uint8_t bb[BITBUF_ROWS][BITBUF_COLS]) {
 	     else if (forecast == 0xc) forecast_str = "Sunny";
          float temp_c = get_os_temperature(msg, 0x5d60);
 	     fprintf(stderr,"Weather Sensor BHTR968  Indoor    Temp: %3.1f°C  %3.1f°F   Humidity: %d%%", temp_c, ((temp_c*9)/5)+32, get_os_humidity(msg, 0x5d60));  
-	     fprintf(stderr, " (%s) Pressure: %dmbar (%s)\n\r", comfort_str, ((msg[7] & 0x0f) | (msg[8] & 0xf0))+856, forecast_str);  
+	     fprintf(stderr, " (%s) Pressure: %dmbar (%s)\n", comfort_str, ((msg[7] & 0x0f) | (msg[8] & 0xf0))+856, forecast_str);  
 	   }
 	   return 1;
 	} else if (sensor_id == 0x2d10) {
@@ -614,30 +673,36 @@ static int oregon_scientific_v2_1_parser(uint8_t bb[BITBUF_ROWS][BITBUF_COLS]) {
 		os_pkt_received_callback(msg, sensor_id);
 		return 1;
 	     }
-	   float rain_rate = (((msg[4] &0x0f)*100)+((msg[4]>>4)*10) + ((msg[5]>>4)&0x0f)) /10.0F;
-       float total_rain = (((msg[7]&0xf)*10000)+((msg[7]>>4)*1000) + ((msg[6]&0xf)*100)+((msg[6]>>4)*10) + (msg[5]&0xf))/10.0F;
-	   fprintf(stderr, "Weather Sensor RGR968   Rain Gauge  Rain Rate: %2.0fmm/hr Total Rain %3.0fmm\n\r", rain_rate, total_rain);
+	     float rain_rate = (((msg[4] &0x0f)*100)+((msg[4]>>4)*10) + ((msg[5]>>4)&0x0f)) /10.0F;
+             float total_rain = (((msg[7]&0xf)*10000)+((msg[7]>>4)*1000) + ((msg[6]&0xf)*100)+((msg[6]>>4)*10) + (msg[5]&0xf))/10.0F;
+	     fprintf(stderr, "Weather Sensor RGR968   Rain Gauge  Rain Rate: %2.0fmm/hr Total Rain %3.0fmm\n", rain_rate, total_rain);
 	   }
 	   return 1;
 	} else if (sensor_id == 0xec40) {
+//DPRINTF("Saw OS sensor\n");
 	  if (validate_os_v2_message(msg, 153, num_valid_v2_bits, 12) == 0) {
+	    if (os_pkt_received_callback != NULL) {
+//DPRINTF("Calling callback\n");
+		os_pkt_received_callback(msg, sensor_id);
+            }
 	    int channel = ((msg[2] >> 4)&0x0f);
 	    if (channel == 4)
 	      channel = 3; // sensor 3 channel number is 0x04
 	    float temp_c = get_os_temperature(msg, sensor_id);
 	    fprintf(stderr, "Thermo Sensor THR228N Channel %d ", channel);
-	    fprintf(stderr, "Temp: %3.1fâC %3.1fâF\n\r", temp_c, ((temp_c*9)/5)+32);
+	    fprintf(stderr, "Temp: %3.1fâC %3.1fâF\n", temp_c, ((temp_c*9)/5)+32);
 	  }
 	  return 1;
 	} else if (num_valid_v2_bits > 16) {
-fprintf(stderr, "%d bit message received from unrecognized Oregon Scientific v2.1 sensor with device ID %x.\n\r", num_valid_v2_bits, sensor_id);
-fprintf(stderr, "Message: "); for (i=0 ; i<20 ; i++) fprintf(stderr, "%02x ", msg[i]); fprintf(stderr,"\n\r\n\r");
+//fprintf(stderr, "%d bit message received from unrecognized Oregon Scientific v2.1 sensor with device ID %x.\n", num_valid_v2_bits, sensor_id);
+//fprintf(stderr, "Message: "); for (i=0 ; i<20 ; i++) fprintf(stderr, "%02x ", msg[i]); fprintf(stderr,"\n\n");
+        }
     } else {
-fprintf(stderr, "\n\rPossible Oregon Scientific v2.1 message, but sync nibble wasn't found\n\r"); fprintf(stderr, "Raw Data: "); for (i=0 ; i<BITBUF_COLS ; i++) fprintf(stderr, "%02x ", bb[0][i]); fprintf(stderr,"\n\r\n\r");    
-    } 
-   } else {
-if (bb[0][3] != 0) int i; fprintf(stderr, "\n\rBadly formatted OS v2.1 message encountered."); for (i=0 ; i<BITBUF_COLS ; i++) fprintf(stderr, "%02x ", bb[0][i]); fprintf(stderr,"\n\r\n\r");}
-   }
+//fprintf(stderr, "\nPossible Oregon Scientific v2.1 message, but sync nibble wasn't found\n"); fprintf(stderr, "Raw Data: "); for (i=0 ; i<BITBUF_COLS ; i++) fprintf(stderr, "%02x ", bb[0][i]); fprintf(stderr,"\n\n");    
+    }
+//   } else {
+//if (bb[0][3] != 0) int i; fprintf(stderr, "\nBadly formatted OS v2.1 message encountered."); for (i=0 ; i<BITBUF_COLS ; i++) fprintf(stderr, "%02x ", bb[0][i]); fprintf(stderr,"\n\n");}
+//   }
    return 0;
 }
 
@@ -657,7 +722,7 @@ static int oregon_scientific_v3_parser(uint8_t bb[BITBUF_ROWS][BITBUF_COLS]) {
         unsigned int  pattern = (unsigned int)(0xffa00000>>pattern_index);
         unsigned int pattern2 = (unsigned int)(0xff500000>>pattern_index);
 		unsigned int pattern3 = (unsigned int)(0x00500000>>pattern_index);
-//fprintf(stderr, "OS v3 Sync nibble search - test_val=%08x pattern=%08x  mask=%08x\n\r", sync_test_val, pattern, mask);
+//fprintf(stderr, "OS v3 Sync nibble search - test_val=%08x pattern=%08x  mask=%08x\n", sync_test_val, pattern, mask);
 	    if (((sync_test_val & mask) == pattern)  ||
             ((sync_test_val & mask) == pattern2) ||		
             ((sync_test_val & mask) == pattern3)) {
@@ -665,7 +730,7 @@ static int oregon_scientific_v3_parser(uint8_t bb[BITBUF_ROWS][BITBUF_COLS]) {
 		  // pattern_index indicates  where sync nibble starts, so now we can find the start of the payload
 	      int start_byte = 3 + (pattern_index>>3);
 	      int start_bit = (pattern_index+4) & 0x07;
-//fprintf(stderr, "Oregon Scientific v3 Sync test val %08x ok, starting decode at byte index %d bit %d\n\r", sync_test_val, start_byte, start_bit);
+//fprintf(stderr, "Oregon Scientific v3 Sync test val %08x ok, starting decode at byte index %d bit %d\n", sync_test_val, start_byte, start_bit);
           j = start_bit;
 	      for (i=start_byte;i<BITBUF_COLS;i++) {
 	        while (j<8) {
@@ -674,7 +739,7 @@ static int oregon_scientific_v3_parser(uint8_t bb[BITBUF_ROWS][BITBUF_COLS]) {
 			   // copy every  bit from source stream to dest packet
 			   msg[dest_bit>>3] |= (((bb[0][i] & (0x80 >> j)) >> (7-j)) << (7-(dest_bit & 0x07)));
 				 
-//fprintf(stderr,"i=%d j=%d dest_bit=%02x bb=%02x msg=%02x\n\r",i, j, dest_bit, bb[0][i], msg[dest_bit>>3]); 
+//fprintf(stderr,"i=%d j=%d dest_bit=%02x bb=%02x msg=%02x\n",i, j, dest_bit, bb[0][i], msg[dest_bit>>3]); 
 			   if ((dest_bit & 0x07) == 0x07) {
 				  // after assembling each dest byte, flip bits in each nibble to convert from lsb to msb bit ordering
 				  int k = (dest_bit>>3);
@@ -701,19 +766,19 @@ static int oregon_scientific_v3_parser(uint8_t bb[BITBUF_ROWS][BITBUF_COLS]) {
 	     int  channel = ((msg[2] >> 4)&0x0f);
 	     float temp_c = get_os_temperature(msg, 0xf824);
 		 int humidity = get_os_humidity(msg, 0xf824);
-		 fprintf(stderr,"Weather Sensor THGR810  Channel %d Temp: %3.1f°C  %3.1f°F   Humidity: %d%%\n\r", channel, temp_c, ((temp_c*9)/5)+32, humidity);
+		 fprintf(stderr,"Weather Sensor THGR810  Channel %d Temp: %3.1f°C  %3.1f°F   Humidity: %d%%\n", channel, temp_c, ((temp_c*9)/5)+32, humidity);
 	   }
 	   return 1;
     } else if ((msg[0] != 0) && (msg[1]!= 0)) { //  sync nibble was found  and some data is present...
-//fprintf(stderr, "Message received from unrecognized Oregon Scientific v3 sensor.\n\r");	
-//fprintf(stderr, "Message: "); for (i=0 ; i<BITBUF_COLS ; i++) fprintf(stderr, "%02x ", msg[i]); fprintf(stderr, "\n\r");
-//fprintf(stderr, "    Raw: "); for (i=0 ; i<BITBUF_COLS ; i++) fprintf(stderr, "%02x ", bb[0][i]); fprintf(stderr,"\n\r\n\r");       
+//fprintf(stderr, "Message received from unrecognized Oregon Scientific v3 sensor.\n");	
+//fprintf(stderr, "Message: "); for (i=0 ; i<BITBUF_COLS ; i++) fprintf(stderr, "%02x ", msg[i]); fprintf(stderr, "\n");
+//fprintf(stderr, "    Raw: "); for (i=0 ; i<BITBUF_COLS ; i++) fprintf(stderr, "%02x ", bb[0][i]); fprintf(stderr,"\n\n");       
     } else if (bb[0][3] != 0) {
-//fprintf(stderr, "\n\rPossible Oregon Scientific v3 message, but sync nibble wasn't found\n\r"); fprintf(stderr, "Raw Data: "); for (i=0 ; i<BITBUF_COLS ; i++) fprintf(stderr, "%02x ", bb[0][i]); fprintf(stderr,"\n\r\n\r");   	
+//fprintf(stderr, "\nPossible Oregon Scientific v3 message, but sync nibble wasn't found\n"); fprintf(stderr, "Raw Data: "); for (i=0 ; i<BITBUF_COLS ; i++) fprintf(stderr, "%02x ", bb[0][i]); fprintf(stderr,"\n\n");   	
     }
    }	
    else { // Based on first couple of bytes, either corrupt message or something other than an Oregon Scientific v3 message
-//if (bb[0][3] != 0) { fprintf(stderr, "\n\rUnrecognized Msg in v3: "); int i; for (i=0 ; i<BITBUF_COLS ; i++) fprintf(stderr, "%02x ", bb[0][i]); fprintf(stderr,"\n\r\n\r"); }
+//if (bb[0][3] != 0) { fprintf(stderr, "\nUnrecognized Msg in v3: "); int i; for (i=0 ; i<BITBUF_COLS ; i++) fprintf(stderr, "%02x ", bb[0][i]); fprintf(stderr,"\n\n"); }
    } 
    return 0;
 }
@@ -847,6 +912,17 @@ r_device oregon_scientific = {
     /* .json_callback  = */ &oregon_scientific_callback,
 };
 
+r_device aureol = {
+    /* .id             = */ 1,
+    /* .name           = */ "Auriol Temperature Sensor",
+    /* .modulation     = */ OOK_PWM_D,
+    /* .short_limit    = */ 750,
+    /* .long_limit     = */ 1500,
+    /* .reset_limit    = */ 5000,
+    /* .json_callback  = */ &aureol_callback,
+};
+
+
 struct protocol_state {
     int (*callback)(uint8_t bits_buffer[BITBUF_ROWS][BITBUF_COLS]);
 
@@ -905,23 +981,23 @@ struct dm_state {
 void usage(void)
 {
     fprintf(stderr,
-        "rtl_433, an ISM band generic data receiver for RTL2832 based DVB-T receivers\n\r\n\r"
-        "Usage:\t[-d device_index (default: 0)]\n\r"
-        "\t[-g gain (default: 0 for auto)]\n\r"
-        "\t[-a analyze mode, print a textual description of the signal]\n\r"
-        "\t[-t signal auto save, use it together with analyze mode (-a -t)\n\r"
-        "\t[-l change the detection level used to determine pulses (0-3200) default: %i]\n\r"
-        "\t[-f [-f...] receive frequency[s], default: %i Hz]\n\r"
-        "\t[-s samplerate (default: %i Hz)]\n\r"
-        "\t[-S force sync output (default: async)]\n\r"
-        "\t[-r read data from file instead of from a receiver]\n\r"
-        "\t[-p ppm_error (default: 0)]\n\r"
-        "\t[-r test file name (indata)]\n\r"
-        "\t[-m test file mode (0 rtl_sdr data, 1 rtl_433 data)]\n\r"
-        "\t[-D print debug info on event\n\r"
-        "\t[-z override short value\n\r"
-        "\t[-x override long value\n\r"
-        "\tfilename (a '-' dumps samples to stdout)\n\r\n\r", DEFAULT_LEVEL_LIMIT, DEFAULT_FREQUENCY, DEFAULT_SAMPLE_RATE);
+        "rtl_433, an ISM band generic data receiver for RTL2832 based DVB-T receivers\n\n"
+        "Usage:\t[-d device_index (default: 0)]\n"
+        "\t[-g gain (default: 0 for auto)]\n"
+        "\t[-a analyze mode, print a textual description of the signal]\n"
+        "\t[-t signal auto save, use it together with analyze mode (-a -t)\n"
+        "\t[-l change the detection level used to determine pulses (0-3200) default: %i]\n"
+        "\t[-f [-f...] receive frequency[s], default: %i Hz]\n"
+        "\t[-s samplerate (default: %i Hz)]\n"
+        "\t[-S force sync output (default: async)]\n"
+        "\t[-r read data from file instead of from a receiver]\n"
+        "\t[-p ppm_error (default: 0)]\n"
+        "\t[-r test file name (indata)]\n"
+        "\t[-m test file mode (0 rtl_sdr data, 1 rtl_433 data)]\n"
+        "\t[-D print debug info on event\n"
+        "\t[-z override short value\n"
+        "\t[-x override long value\n"
+        "\tfilename (a '-' dumps samples to stdout)\n\n", DEFAULT_LEVEL_LIMIT, DEFAULT_FREQUENCY, DEFAULT_SAMPLE_RATE);
     exit(1);
 }
 
@@ -930,7 +1006,7 @@ BOOL WINAPI
 sighandler(int signum)
 {
     if (CTRL_C_EVENT == signum) {
-        fprintf(stderr, "Signal caught, exiting!\n\r");
+        fprintf(stderr, "Signal caught, exiting!\n");
         do_exit = 1;
         rtlsdr_cancel_async(dev);
         return TRUE;
@@ -940,7 +1016,7 @@ sighandler(int signum)
 #else
 static void sighandler(int signum)
 {
-    fprintf(stderr, "Signal caught, exiting!\n\r");
+    fprintf(stderr, "Signal caught, exiting!\n");
     do_exit = 1;
     rtlsdr_cancel_async(dev);
 }
@@ -988,7 +1064,7 @@ static void demod_add_bit(struct protocol_state* p, int bit) {
         p->bits_col_idx++;
         if (p->bits_col_idx>BITBUF_COLS-1) {
             p->bits_col_idx = BITBUF_COLS-1;
-//            fprintf(stderr, "p->bits_col_idx>%i!\n\r", BITBUF_COLS-1);
+//            fprintf(stderr, "p->bits_col_idx>%i!\n", BITBUF_COLS-1);
         }
     }
     p->bits_per_row[p->bit_rows]++;
@@ -1000,7 +1076,7 @@ static void demod_next_bits_packet(struct protocol_state* p) {
     p->bits_bit_col_idx = 7;
     if (p->bits_row_idx>BITBUF_ROWS-1) {
         p->bits_row_idx = BITBUF_ROWS-1;
-        //fprintf(stderr, "p->bits_row_idx>%i!\n\r", BITBUF_ROWS-1);
+        //fprintf(stderr, "p->bits_row_idx>%i!\n", BITBUF_ROWS-1);
     }
     p->bit_rows++;
     if (p->bit_rows > BITBUF_ROWS-1)
@@ -1010,7 +1086,7 @@ static void demod_next_bits_packet(struct protocol_state* p) {
 static void demod_print_bits_packet(struct protocol_state* p) {
     int i,j,k;
 
-    fprintf(stderr, "\n\r");
+    fprintf(stderr, "\n");
     for (i=0 ; i<p->bit_rows+1 ; i++) {
         fprintf(stderr, "[%02d] {%d} ",i, p->bits_per_row[i]);
         for (j=0 ; j<((p->bits_per_row[i]+8)/8) ; j++) {
@@ -1027,9 +1103,9 @@ static void demod_print_bits_packet(struct protocol_state* p) {
 //            fprintf(stderr, "=0x%x ",demod->bits_buffer[i][j]);
             fprintf(stderr, " ");
         }
-        fprintf(stderr, "\n\r");
+        fprintf(stderr, "\n");
     }
-    fprintf(stderr, "\n\r");
+    fprintf(stderr, "\n");
     return;
 }
 
@@ -1045,10 +1121,10 @@ static void register_protocol(struct dm_state *demod, r_device *t_dev) {
     demod->r_devs[demod->r_dev_num] = p;
     demod->r_dev_num++;
 
-    fprintf(stderr, "Registering protocol[%02d] %s\n\r",demod->r_dev_num, t_dev->name);
+    fprintf(stderr, "Registering protocol[%02d] %s\n",demod->r_dev_num, t_dev->name);
 
     if (demod->r_dev_num > MAX_PROTOCOLS)
-        fprintf(stderr, "Max number of protocols reached %d\n\r",MAX_PROTOCOLS);
+        fprintf(stderr, "Max number of protocols reached %d\n",MAX_PROTOCOLS);
 }
 
 
@@ -1081,7 +1157,7 @@ static void classify_signal() {
 
     for (i=0 ; i<1000 ; i++) {
         if (signal_pulse_data[i][0] > 0) {
-            //fprintf(stderr, "[%03d] s: %d\t  e:\t %d\t l:%d\n\r",
+            //fprintf(stderr, "[%03d] s: %d\t  e:\t %d\t l:%d\n",
             //i, signal_pulse_data[i][0], signal_pulse_data[i][1],
             //signal_pulse_data[i][2]);
             if (signal_pulse_data[i][2] > max)
@@ -1091,7 +1167,7 @@ static void classify_signal() {
         }
     }
     t=(max+min)/2;
-    //fprintf(stderr, "\n\r\n\rMax: %d, Min: %d  t:%d\n\r", max, min, t);
+    //fprintf(stderr, "\n\nMax: %d, Min: %d  t:%d\n", max, min, t);
 
     delta = (max - min)*(max-min);
 
@@ -1121,21 +1197,21 @@ static void classify_signal() {
         max = max_new;
         t = (min + max)/2;
 
-        fprintf(stderr, "Iteration %d. t: %d    min: %d (%d)    max: %d (%d)    delta %d\n\r", k,t, min, count_min, max, count_max, delta);
+        fprintf(stderr, "Iteration %d. t: %d    min: %d (%d)    max: %d (%d)    delta %d\n", k,t, min, count_min, max, count_max, delta);
         k++;
     }
 
     for (i=0 ; i<1000 ; i++) {
         if (signal_pulse_data[i][0] > 0) {
-            //fprintf(stderr, "%d\n\r", signal_pulse_data[i][1]);
+            //fprintf(stderr, "%d\n", signal_pulse_data[i][1]);
         }
     }
     /* 50% decision limit */
     if (max/min > 1) {
-        fprintf(stderr, "Pulse coding: Short pulse length %d - Long pulse length %d\n\r", min, max);
+        fprintf(stderr, "Pulse coding: Short pulse length %d - Long pulse length %d\n", min, max);
         signal_type = 2;
     } else {
-        fprintf(stderr, "Distance coding: Pulse length %d\n\r", (min+max)/2);
+        fprintf(stderr, "Distance coding: Pulse length %d\n", (min+max)/2);
         signal_type = 1;
     }
     p_limit = (max+min)/2;
@@ -1145,7 +1221,7 @@ static void classify_signal() {
     a[2] = 0;
     for (i=1 ; i<1000 ; i++) {
         if (signal_pulse_data[i][0] > 0) {
-fprintf(stderr, "[%03d] s: %d\t  e:\t %d\t l:%d\t  d:%d\n\r",
+fprintf(stderr, "[%03d] s: %d\t  e:\t %d\t l:%d\t  d:%d\n",
                i, signal_pulse_data[i][0], signal_pulse_data[i][1],
                signal_pulse_data[i][2], signal_pulse_data[i][0]-signal_pulse_data[i-1][1]);
             signal_distance_data[i-1] = signal_pulse_data[i][0]-signal_pulse_data[i-1][1];
@@ -1163,8 +1239,8 @@ fprintf(stderr, "[%03d] s: %d\t  e:\t %d\t l:%d\t  d:%d\n\r",
 //    }
     b[0] = (a[0]+a[1])/2;
     b[1] = (a[1]+a[2])/2;
-//     fprintf(stderr, "a[0]: %d\t a[1]: %d\t a[2]: %d\t\n\r",a[0],a[1],a[2]);
-//     fprintf(stderr, "b[0]: %d\t b[1]: %d\n\r",b[0],b[1]);
+//     fprintf(stderr, "a[0]: %d\t a[1]: %d\t a[2]: %d\t\n",a[0],a[1],a[2]);
+//     fprintf(stderr, "b[0]: %d\t b[1]: %d\n",b[0],b[1]);
 
     k=1;
     delta = 10000000;
@@ -1198,19 +1274,19 @@ fprintf(stderr, "[%03d] s: %d\t  e:\t %d\t l:%d\t  d:%d\n\r",
 //             fprintf(stderr, "\ta[%d]: %d (%d)", i, a_new[i], a[i]);
             a[i] = a_new[i];
         }
-//         fprintf(stderr, " delta %d\n\r", delta);
+//         fprintf(stderr, " delta %d\n", delta);
 
         if (a[0] < min) {
             a[0] = min;
-//             fprintf(stderr, "Fixing a[0] = %d\n\r", min);
+//             fprintf(stderr, "Fixing a[0] = %d\n", min);
         }
         if (a[2] > max) {
             a[0] = max;
-//             fprintf(stderr, "Fixing a[2] = %d\n\r", max);
+//             fprintf(stderr, "Fixing a[2] = %d\n", max);
         }
 //         if (a[1] == 0) {
 //             a[1] = (a[2]+a[0])/2;
-//             fprintf(stderr, "Fixing a[1] = %d\n\r", a[1]);
+//             fprintf(stderr, "Fixing a[1] = %d\n", a[1]);
 //         }
 
 //         fprintf(stderr, "Iteration %d.", k);
@@ -1219,7 +1295,7 @@ fprintf(stderr, "[%03d] s: %d\t  e:\t %d\t l:%d\t  d:%d\n\r",
             b[i] = (a[i]+a[i+1])/2;
 //             fprintf(stderr, "%d  ", b[i]);
         }
-//         fprintf(stderr, "\n\r");
+//         fprintf(stderr, "\n");
         k++;
     }
 
@@ -1232,21 +1308,21 @@ fprintf(stderr, "[%03d] s: %d\t  e:\t %d\t l:%d\t  d:%d\n\r",
         a[1] = override_long;
     }
 
-    fprintf(stderr, "\n\rShort distance: %d, long distance: %d, packet distance: %d\n\r",a[0],a[1],a[2]);
-    fprintf(stderr, "\n\rp_limit: %d\n\r",p_limit);
+    fprintf(stderr, "\nShort distance: %d, long distance: %d, packet distance: %d\n",a[0],a[1],a[2]);
+    fprintf(stderr, "\np_limit: %d\n",p_limit);
 
     demod_reset_bits_packet(&p);
     if (signal_type == 1) {
         for(i=0 ; i<1000 ; i++){
             if (signal_distance_data[i] > 0) {
                 if (signal_distance_data[i] < (a[0]+a[1])/2) {
-//                     fprintf(stderr, "0 [%d] %d < %d\n\r",i, signal_distance_data[i], (a[0]+a[1])/2);
+//                     fprintf(stderr, "0 [%d] %d < %d\n",i, signal_distance_data[i], (a[0]+a[1])/2);
                     demod_add_bit(&p, 0);
                 } else if ((signal_distance_data[i] > (a[0]+a[1])/2) && (signal_distance_data[i] < (a[1]+a[2])/2)) {
-//                     fprintf(stderr, "0 [%d] %d > %d\n\r",i, signal_distance_data[i], (a[0]+a[1])/2);
+//                     fprintf(stderr, "0 [%d] %d > %d\n",i, signal_distance_data[i], (a[0]+a[1])/2);
                     demod_add_bit(&p, 1);
                 } else if (signal_distance_data[i] > (a[1]+a[2])/2) {
-//                     fprintf(stderr, "0 [%d] %d > %d\n\r",i, signal_distance_data[i], (a[1]+a[2])/2);
+//                     fprintf(stderr, "0 [%d] %d > %d\n",i, signal_distance_data[i], (a[1]+a[2])/2);
                     demod_next_bits_packet(&p);
                 }
 
@@ -1259,14 +1335,14 @@ fprintf(stderr, "[%03d] s: %d\t  e:\t %d\t l:%d\t  d:%d\n\r",
         for(i=0 ; i<1000 ; i++){
             if(signal_pulse_data[i][2] > 0) {
                 if (signal_pulse_data[i][2] < p_limit) {
-                     //fprintf(stderr, "0 [%d] %d < %d\n\r",i, signal_pulse_data[i][2], p_limit);
+                     //fprintf(stderr, "0 [%d] %d < %d\n",i, signal_pulse_data[i][2], p_limit);
                     demod_add_bit(&p, 0);
                 } else {
-                     //fprintf(stderr, "1 [%d] %d > %d\n\r",i, signal_pulse_data[i][2], p_limit);
+                     //fprintf(stderr, "1 [%d] %d > %d\n",i, signal_pulse_data[i][2], p_limit);
                     demod_add_bit(&p, 1);
                 }
                 if ((signal_distance_data[i] >= (a[1]+a[2])/2)) {
-                     //fprintf(stderr, "\\n\r [%d] %d > %d\n\r",i, signal_distance_data[i], (a[1]+a[2])/2);
+                     //fprintf(stderr, "\\n [%d] %d > %d\n",i, signal_distance_data[i], (a[1]+a[2])/2);
                     demod_next_bits_packet(&p);
                 }
 
@@ -1300,9 +1376,9 @@ static void pwm_analyze(struct dm_state *demod, int16_t *buf, uint32_t len)
                 signal_pulse_data[signal_pulse_counter][0] = counter;
                 signal_pulse_data[signal_pulse_counter][1] = -1;
                 signal_pulse_data[signal_pulse_counter][2] = -1;
-                if (debug_output) fprintf(stderr, "pulse_distance %d\n\r",counter-pulse_end);
-                if (debug_output) fprintf(stderr, "pulse_start distance %d\n\r",pulse_start-prev_pulse_start);
-                if (debug_output) fprintf(stderr, "pulse_start[%d] found at sample %d, value = %d\n\r",pulses_found, counter, buf[i]);
+                if (debug_output) fprintf(stderr, "pulse_distance %d\n",counter-pulse_end);
+                if (debug_output) fprintf(stderr, "pulse_start distance %d\n",pulse_start-prev_pulse_start);
+                if (debug_output) fprintf(stderr, "pulse_start[%d] found at sample %d, value = %d\n",pulses_found, counter, buf[i]);
                 prev_pulse_start = pulse_start;
                 print =0;
                 print2 = 1;
@@ -1312,7 +1388,7 @@ static void pwm_analyze(struct dm_state *demod, int16_t *buf, uint32_t len)
         if (buf[i] < demod->level_limit) {
             if (print2) {
                 pulse_avg += counter-pulse_start;
-                if (debug_output) fprintf(stderr, "pulse_end  [%d] found at sample %d, pulse length = %d, pulse avg length = %d\n\r",
+                if (debug_output) fprintf(stderr, "pulse_end  [%d] found at sample %d, pulse length = %d, pulse avg length = %d\n",
                         pulses_found, counter, counter-pulse_start, pulse_avg/pulses_found);
                 pulse_end = counter;
                 print2 = 0;
@@ -1327,8 +1403,8 @@ static void pwm_analyze(struct dm_state *demod, int16_t *buf, uint32_t len)
             print = 1;
             if (signal_start && (pulse_end + 50000 < counter)) {
                 signal_end = counter - 40000;
-                fprintf(stderr, "*** signal_start = %d, signal_end = %d\n\r",signal_start-10000, signal_end);
-                fprintf(stderr, "signal_len = %d,  pulses = %d\n\r", signal_end-(signal_start-10000), pulses_found);
+                fprintf(stderr, "*** signal_start = %d, signal_end = %d\n",signal_start-10000, signal_end);
+                fprintf(stderr, "signal_len = %d,  pulses = %d\n", signal_end-(signal_start-10000), pulses_found);
                 pulses_found = 0;
                 classify_signal();
 
@@ -1347,31 +1423,31 @@ static void pwm_analyze(struct dm_state *demod, int16_t *buf, uint32_t len)
                         sg_idx = SIGNAL_GRABBER_BUFFER-demod->sg_len;
                     idx = (i-40000)*2;
                     start_pos = sg_idx+idx-signal_bszie;
-                    fprintf(stderr, "signal_bszie = %d  -      sg_index = %d\n\r", signal_bszie, demod->sg_index);
-                    fprintf(stderr, "start_pos    = %d  -   buffer_size = %d\n\r", start_pos, SIGNAL_GRABBER_BUFFER);
+                    fprintf(stderr, "signal_bszie = %d  -      sg_index = %d\n", signal_bszie, demod->sg_index);
+                    fprintf(stderr, "start_pos    = %d  -   buffer_size = %d\n", start_pos, SIGNAL_GRABBER_BUFFER);
                     if (signal_bszie > SIGNAL_GRABBER_BUFFER)
-                        fprintf(stderr, "Signal bigger then buffer, signal = %d > buffer %d !!\n\r", signal_bszie, SIGNAL_GRABBER_BUFFER);
+                        fprintf(stderr, "Signal bigger then buffer, signal = %d > buffer %d !!\n", signal_bszie, SIGNAL_GRABBER_BUFFER);
 
                     if (start_pos < 0) {
                         start_pos = SIGNAL_GRABBER_BUFFER+start_pos;
-                        fprintf(stderr, "restart_pos = %d\n\r", start_pos);
+                        fprintf(stderr, "restart_pos = %d\n", start_pos);
                     }
 
-                    fprintf(stderr, "*** Saving signal to file %s\n\r",sgf_name);
+                    fprintf(stderr, "*** Saving signal to file %s\n",sgf_name);
                     sgfp = fopen(sgf_name, "wb");
                     if (!sgfp) {
-                        fprintf(stderr, "Failed to open %s\n\r", sgf_name);
+                        fprintf(stderr, "Failed to open %s\n", sgf_name);
                     }
                     wlen = signal_bszie;
                     if (start_pos + signal_bszie > SIGNAL_GRABBER_BUFFER) {
                         wlen = SIGNAL_GRABBER_BUFFER - start_pos;
                         wrest = signal_bszie - wlen;
                     }
-                    fprintf(stderr, "*** Writing data from %d, len %d\n\r",start_pos, wlen);
+                    fprintf(stderr, "*** Writing data from %d, len %d\n",start_pos, wlen);
                     fwrite(&demod->sg_buf[start_pos], 1, wlen, sgfp);
 
                     if (wrest) {
-                        fprintf(stderr, "*** Writing data from %d, len %d\n\r",0, wrest);
+                        fprintf(stderr, "*** Writing data from %d, len %d\n",0, wrest);
                         fwrite(&demod->sg_buf[0], 1, wrest,  sgfp);
                     }
 
@@ -1386,7 +1462,7 @@ static void pwm_analyze(struct dm_state *demod, int16_t *buf, uint32_t len)
     return;
 
 err:
-    fprintf(stderr, "To many pulses detected, probably bad input data or input parameters\n\r");
+    fprintf(stderr, "To many pulses detected, probably bad input data or input parameters\n");
     return;
 }
 
@@ -1444,13 +1520,13 @@ static void pwm_p_decode(struct dm_state *demod, struct protocol_state* p, int16
             p->start_bit      = 1;
             p->start_c        = 1;
             p->sample_counter = 0;
-//            fprintf(stderr, "start bit pulse start detected\n\r");
+//            fprintf(stderr, "start bit pulse start detected\n");
         }
 
         if (!p->real_bits && p->start_bit && (buf[i] < demod->level_limit)) {
             /* end of startbit */
             p->real_bits = 1;
-//            fprintf(stderr, "start bit pulse end detected\n\r");
+//            fprintf(stderr, "start bit pulse end detected\n");
         }
         if (p->start_c) p->sample_counter++;
 
@@ -1458,7 +1534,7 @@ static void pwm_p_decode(struct dm_state *demod, struct protocol_state* p, int16
         if (!p->pulse_start && p->real_bits && (buf[i] > demod->level_limit)) {
             /* save the pulse start, it will never be zero */
             p->pulse_start = p->sample_counter;
-//           fprintf(stderr, "real bit pulse start detected\n\r");
+//           fprintf(stderr, "real bit pulse start detected\n");
 
         }
 
@@ -1466,8 +1542,8 @@ static void pwm_p_decode(struct dm_state *demod, struct protocol_state* p, int16
             /* end of pulse */
 
             p->pulse_length = p->sample_counter-p->pulse_start;
-//           fprintf(stderr, "real bit pulse end detected %d\n\r", p->pulse_length);
-//           fprintf(stderr, "space duration %d\n\r", p->sample_counter);
+//           fprintf(stderr, "real bit pulse end detected %d\n", p->pulse_length);
+//           fprintf(stderr, "space duration %d\n", p->sample_counter);
 
             if (p->pulse_length <= p->short_limit) {
                 demod_add_bit(p, 1);
@@ -1540,7 +1616,7 @@ static void manchester_decode(struct dm_state *demod, struct protocol_state* p, 
         }
 
         if (p->sample_counter > p->reset_limit) {
-	//fprintf(stderr, "manchester_decode number of bits received=%d\n\r",p->start_c); 
+	//fprintf(stderr, "manchester_decode number of bits received=%d\n",p->start_c); 
 		   if (p->callback)
               events+=p->callback(p->bits_buffer);
            else
@@ -1584,7 +1660,7 @@ static void low_pass_filter(uint16_t *x_buf, int16_t *y_buf, uint32_t len)
     /* Save last sample */
     memcpy(lp_xmem, &x_buf[len-1-FILTER_ORDER], FILTER_ORDER*sizeof(int16_t));
     memcpy(&y_buf[-FILTER_ORDER], &y_buf[len-1-FILTER_ORDER], FILTER_ORDER*sizeof(int16_t));
-    //fprintf(stderr, "%d\n\r", y_buf[0]);
+    //fprintf(stderr, "%d\n", y_buf[0]);
 }
 
 
@@ -1604,7 +1680,7 @@ static void rtlsdr_callback(unsigned char *buf, uint32_t len, void *ctx)
         }
 
         if (demod->signal_grabber) {
-            //fprintf(stderr, "[%d] sg_index - len %d\n\r", demod->sg_index, len );
+            //fprintf(stderr, "[%d] sg_index - len %d\n", demod->sg_index, len );
             memcpy(&demod->sg_buf[demod->sg_index], buf, len);
             demod->sg_len =len;
             demod->sg_index +=len;
@@ -1634,14 +1710,14 @@ static void rtlsdr_callback(unsigned char *buf, uint32_t len, void *ctx)
                         manchester_decode(demod, demod->r_devs[i], demod->f_buf, len/2);
                         break;
 					default:
-                        fprintf(stderr, "Unknown modulation %d in protocol!\n\r", demod->r_devs[i]->modulation);
+                        fprintf(stderr, "Unknown modulation %d in protocol!\n", demod->r_devs[i]->modulation);
                 }
             }
         }
 
         if (demod->save_data) {
             if (fwrite(demod->f_buf, 1, len>>demod->decimation_level, demod->file) != len>>demod->decimation_level) {
-                fprintf(stderr, "Short write, samples lost, exiting!\n\r");
+                fprintf(stderr, "Short write, samples lost, exiting!\n");
                 rtlsdr_cancel_async(dev);
             }
         }
@@ -1701,7 +1777,7 @@ int rtl_433_main(int argc, char **argv)
             break;
         case 'f':
             if(frequencies<MAX_PROTOCOLS) frequency[frequencies++] = (uint32_t)atof(optarg);
-            else fprintf(stderr, "Max number of frequencies reached %d\n\r",MAX_PROTOCOLS);
+            else fprintf(stderr, "Max number of frequencies reached %d\n",MAX_PROTOCOLS);
             break;
         case 'g':
             gain = (int)(atof(optarg) * 10); /* tenths of a dB */
@@ -1765,6 +1841,7 @@ int rtl_433_main(int argc, char **argv)
 //    register_protocol(demod, &waveman);
 //    register_protocol(demod, &steffen);
 //    register_protocol(demod, &acurite_rain_gauge);
+   register_protocol(demod, &aureol);
    register_protocol(demod, &oregon_scientific);
 
     if (argc <= optind-1) {
@@ -1775,34 +1852,34 @@ int rtl_433_main(int argc, char **argv)
     if(out_block_size < MINIMAL_BUF_LENGTH ||
        out_block_size > MAXIMAL_BUF_LENGTH ){
         fprintf(stderr,
-            "Output block size wrong value, falling back to default\n\r");
+            "Output block size wrong value, falling back to default\n");
         fprintf(stderr,
-            "Minimal length: %u\n\r", MINIMAL_BUF_LENGTH);
+            "Minimal length: %u\n", MINIMAL_BUF_LENGTH);
         fprintf(stderr,
-            "Maximal length: %u\n\r", MAXIMAL_BUF_LENGTH);
+            "Maximal length: %u\n", MAXIMAL_BUF_LENGTH);
         out_block_size = DEFAULT_BUF_LENGTH;
     }
     buffer = malloc(out_block_size * sizeof(uint8_t));
     device_count = rtlsdr_get_device_count();
     if (!device_count) {
-        fprintf(stderr, "No supported devices found.\n\r");
+        fprintf(stderr, "No supported devices found.\n");
         if (!test_mode_file)
             exit(1);
     }
 
-    fprintf(stderr, "Found %d device(s):\n\r", device_count);
+    fprintf(stderr, "Found %d device(s):\n", device_count);
     for (i = 0; i < device_count; i++) {
         rtlsdr_get_device_usb_strings(i, vendor, product, serial);
-        fprintf(stderr, "  %d:  %s, %s, SN: %s\n\r", i, vendor, product, serial);
+        fprintf(stderr, "  %d:  %s, %s, SN: %s\n", i, vendor, product, serial);
     }
-    fprintf(stderr, "\n\r");
+    fprintf(stderr, "\n");
 
-    fprintf(stderr, "Using device %d: %s\n\r",
+    fprintf(stderr, "Using device %d: %s\n",
         dev_index, rtlsdr_get_device_name(dev_index));
 
     r = rtlsdr_open(&dev, dev_index);
     if (r < 0) {
-        fprintf(stderr, "Failed to open rtlsdr device #%d.\n\r", dev_index);
+        fprintf(stderr, "Failed to open rtlsdr device #%d.\n", dev_index);
         if (!test_mode_file)
             exit(1);
     }
@@ -1820,32 +1897,32 @@ int rtl_433_main(int argc, char **argv)
     /* Set the sample rate */
     r = rtlsdr_set_sample_rate(dev, samp_rate);
     if (r < 0)
-        fprintf(stderr, "WARNING: Failed to set sample rate.\n\r");
+        fprintf(stderr, "WARNING: Failed to set sample rate.\n");
     else
-        fprintf(stderr, "Sample rate set to %d.\n\r", rtlsdr_get_sample_rate(dev)); // Unfortunately, doesn't return real rate
+        fprintf(stderr, "Sample rate set to %d.\n", rtlsdr_get_sample_rate(dev)); // Unfortunately, doesn't return real rate
 
-    fprintf(stderr, "Sample rate decimation set to %d. %d->%d\n\r",demod->decimation_level, samp_rate, samp_rate>>demod->decimation_level);
-    fprintf(stderr, "Bit detection level set to %d.\n\r", demod->level_limit);
+    fprintf(stderr, "Sample rate decimation set to %d. %d->%d\n",demod->decimation_level, samp_rate, samp_rate>>demod->decimation_level);
+    fprintf(stderr, "Bit detection level set to %d.\n", demod->level_limit);
 
     if (0 == gain) {
          /* Enable automatic gain */
         r = rtlsdr_set_tuner_gain_mode(dev, 0);
         if (r < 0)
-            fprintf(stderr, "WARNING: Failed to enable automatic gain.\n\r");
+            fprintf(stderr, "WARNING: Failed to enable automatic gain.\n");
         else
-            fprintf(stderr, "Tuner gain set to Auto.\n\r");
+            fprintf(stderr, "Tuner gain set to Auto.\n");
     } else {
         /* Enable manual gain */
         r = rtlsdr_set_tuner_gain_mode(dev, 1);
         if (r < 0)
-            fprintf(stderr, "WARNING: Failed to enable manual gain.\n\r");
+            fprintf(stderr, "WARNING: Failed to enable manual gain.\n");
 
         /* Set the tuner gain */
         r = rtlsdr_set_tuner_gain(dev, gain);
         if (r < 0)
-            fprintf(stderr, "WARNING: Failed to set tuner gain.\n\r");
+            fprintf(stderr, "WARNING: Failed to set tuner gain.\n");
         else
-            fprintf(stderr, "Tuner gain set to %f dB.\n\r", gain/10.0);
+            fprintf(stderr, "Tuner gain set to %f dB.\n", gain/10.0);
     }
 	
     r = rtlsdr_set_freq_correction(dev, ppm_error);
@@ -1861,7 +1938,7 @@ int rtl_433_main(int argc, char **argv)
     } else {	
         demod->file = fopen(filename, "wb");
         if (!demod->file) {
-            fprintf(stderr, "Failed to open %s\n\r", filename);
+            fprintf(stderr, "Failed to open %s\n", filename);
             goto out;
         }
     }
@@ -1872,10 +1949,10 @@ int rtl_433_main(int argc, char **argv)
     if (test_mode_file) {
         int i = 0;
         unsigned char test_mode_buf[DEFAULT_BUF_LENGTH];
-        fprintf(stderr, "Test mode active. Reading samples from file: %s\n\r",test_mode_file);
+        fprintf(stderr, "Test mode active. Reading samples from file: %s\n",test_mode_file);
         test_mode = fopen(test_mode_file, "r");
         if (!test_mode) {
-            fprintf(stderr, "Opening file: %s failed!\n\r",test_mode_file);
+            fprintf(stderr, "Opening file: %s failed!\n",test_mode_file);
             goto out;
         }
         while(fread(test_mode_buf, 131072, 1, test_mode) != 0) {
@@ -1884,24 +1961,24 @@ int rtl_433_main(int argc, char **argv)
         }
         //Always classify a signal at the end of the file
         classify_signal();
-        fprintf(stderr, "Test mode file issued %d packets\n\r", i);
-        fprintf(stderr, "Filter coeffs used:\n\r");
-        fprintf(stderr, "a: %d %d\n\r", a[0], a[1]);
-        fprintf(stderr, "b: %d %d\n\r", b[0], b[1]);
+        fprintf(stderr, "Test mode file issued %d packets\n", i);
+        fprintf(stderr, "Filter coeffs used:\n");
+        fprintf(stderr, "a: %d %d\n", a[0], a[1]);
+        fprintf(stderr, "b: %d %d\n", b[0], b[1]);
         exit(0);
     }
 
     /* Reset endpoint before we start reading from it (mandatory) */
     r = rtlsdr_reset_buffer(dev);
     if (r < 0)
-        fprintf(stderr, "WARNING: Failed to reset buffers.\n\r");
+        fprintf(stderr, "WARNING: Failed to reset buffers.\n");
 
     if (sync_mode) {
-        fprintf(stderr, "Reading samples in sync mode...\n\r");
+        fprintf(stderr, "Reading samples in sync mode...\n");
         while (!do_exit) {
             r = rtlsdr_read_sync(dev, buffer, out_block_size, &n_read);
             if (r < 0) {
-                fprintf(stderr, "WARNING: sync read failed.\n\r");
+                fprintf(stderr, "WARNING: sync read failed.\n");
                 break;
             }
 
@@ -1911,12 +1988,12 @@ int rtl_433_main(int argc, char **argv)
             }
 
             if (fwrite(buffer, 1, n_read, demod->file) != (size_t)n_read) {
-                fprintf(stderr, "Short write, samples lost, exiting!\n\r");
+                fprintf(stderr, "Short write, samples lost, exiting!\n");
                 break;
             }
 
             if ((uint32_t)n_read < out_block_size) {
-                fprintf(stderr, "Short read, samples lost, exiting!\n\r");
+                fprintf(stderr, "Short read, samples lost, exiting!\n");
                 break;
             }
 
@@ -1930,14 +2007,14 @@ int rtl_433_main(int argc, char **argv)
         } else {
           time(&rawtime_old);
         }
-        fprintf(stderr, "Reading samples in async mode...\n\r");
+        fprintf(stderr, "Reading samples in async mode...\n");
         while(!do_exit) {
             /* Set the frequency */
             r = rtlsdr_set_center_freq(dev, frequency[frequency_current]);
             if (r < 0)
-                fprintf(stderr, "WARNING: Failed to set center freq.\n\r");
+                fprintf(stderr, "WARNING: Failed to set center freq.\n");
             else
-                fprintf(stderr, "Tuned to %u Hz.\n\r", rtlsdr_get_center_freq(dev));
+                fprintf(stderr, "Tuned to %u Hz.\n", rtlsdr_get_center_freq(dev));
             r = rtlsdr_read_async(dev, rtlsdr_callback, (void *)demod,
                           DEFAULT_ASYNC_BUF_NUMBER, out_block_size);
             do_exit_async=0;
@@ -1947,9 +2024,9 @@ int rtl_433_main(int argc, char **argv)
     }
 
     if (do_exit)
-        fprintf(stderr, "\n\rUser cancel, exiting...\n\r");
+        fprintf(stderr, "\nUser cancel, exiting...\n");
     else
-        fprintf(stderr, "\n\rLibrary error %d, exiting...\n\r", r);
+        fprintf(stderr, "\nLibrary error %d, exiting...\n", r);
 
     if (demod->file && (demod->file != stdout))
         fclose(demod->file);

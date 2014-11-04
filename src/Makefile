@@ -7,20 +7,20 @@ BUILD_DATE_STRING=$(shell date +"%m-%d-%Y")
 # Requires wrt cross toolchain:
 #    eg. OpenWrt-Toolchain-bcm53xx-for-arm_cortex-a9-gcc-4.8-linaro_uClibc-0.9.33.2_eabi
 # Once you have the toolchain tar, expand it somewhere and set vars below to point to gcc and lib
-TARGET_DISPLAY_NAME = Netgear R7000
-TOOLCHAIN=/home/ubuntu/toolchain-arm_cortex-a9_gcc-4.8-linaro_uClibc-0.9.33.2_eabi
-export STAGING_DIR = . 
-CC   = $(TOOLCHAIN)/bin/arm-openwrt-linux-uclibcgnueabi-gcc
-CFLAGS = -I. -I$(TOOLCHAIN)/include/libusb-1.0 -Ilibrtlsdr/include
-LIBUSB_DIR = $(TOOLCHAIN)/lib
-LIBRTLSDR_DIR = librtlsdr/build/src
+#TARGET_DISPLAY_NAME = Netgear R7000
+#TOOLCHAIN=/home/ubuntu/toolchain-arm_cortex-a9_gcc-4.8-linaro_uClibc-0.9.33.2_eabi
+#export STAGING_DIR = . 
+#CC   = $(TOOLCHAIN)/bin/arm-openwrt-linux-uclibcgnueabi-gcc
+#CFLAGS = -I. -I$(TOOLCHAIN)/include/libusb-1.0 -Ilibrtlsdr/include
+#LIBUSB_DIR = $(TOOLCHAIN)/lib
+#LIBRTLSDR_DIR = librtlsdr/build/src
 
 # Uncomment Below to build for Raspberry Pi (native compile)
-#TARGET_DISPLAY_NAME = Raspberry Pi
-#CC = gcc
-#CFLAGS = -I. -I/usr/include/libusb-1.0 -Ilibrtlsdr/include
-#LIBUSB_DIR = .
-#LIBRTLSDR_DIR = librtlsdr/build/src
+TARGET_DISPLAY_NAME = Raspberry Pi
+CC = gcc
+CFLAGS = -I. -I/usr/include/libusb-1.0 -Ilibrtlsdr/include
+LIBUSB_DIR = .
+LIBRTLSDR_DIR = librtlsdr/build/src
 
 # Netgear WNR3500L running DD-WRT using cross tools on hosted on
 # linux.  Target cpu is MIPSEL Requires cross toolchain, 
